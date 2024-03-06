@@ -53,7 +53,7 @@ export default class VisitorEntry extends React.Component<IVisitorProps, FormSta
         var Date = $("#in_time").val()
         var FormatDate = moment(Date).format('DD-MM-YYYY hh:mm A')
         let photoBlob: any;
-        if (this.state.capturedPhoto != "") {
+        if (this.state.UserAlreadyExists == false) {
             photoBlob = this.dataURItoBlob(this.state.capturedPhoto);
         }
         NewWeb.lists.getByTitle("Visitor User Transaction").items.add({
@@ -137,11 +137,13 @@ export default class VisitorEntry extends React.Component<IVisitorProps, FormSta
             for (const attachment of sourceListAttachments) {
                 // Get the content of each attachment
                 const attachmentFile = await NewWeb.getFileByServerRelativeUrl(attachment.ServerRelativeUrl);
-                const attachmentContent = await attachmentFile.getBlob();
+                const attachmentContent = await attachmentFile.getBlob().then((file: any) => {
+                    console.log("File", file)
+                });
                 console.log(attachmentContent);
                 Files.push({
-                    "name": "User_photo.jpg",
-                    "content": attachmentContent
+                    name: "User_photo.jpg",
+                    content: attachmentContent
                 });
                 this
             }
