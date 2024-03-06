@@ -40,7 +40,7 @@ export default class VisitorDetails extends React.Component<IVisitorProps, FormS
         this.GetVisitorDetails()
     }
     public GetVisitorDetails() {
-        NewWeb.lists.getByTitle("Visitor Transaction").items.select("*").expand('AttachmentFiles').get()
+        NewWeb.lists.getByTitle("Visitor User Transaction").items.select("*").expand('AttachmentFiles').get()
             .then((items: any) => {
                 if (items.length != 0) {
                     console.log(items)
@@ -81,13 +81,12 @@ export default class VisitorDetails extends React.Component<IVisitorProps, FormS
     public render(): React.ReactElement<IVisitorProps> {
         const TableDetails: JSX.Element[] = this.state.tableItems.map(function (item: any, key: any) {
             return (
-
                 <tr>
                     <td>{key + 1}</td>
                     <td>{item.Title}</td>
                     <td>{item.MobileNumber}</td>
                     <td>{item.EmiratesID}</td>
-                    <td>{item.CompanyName == true ? "Template 1" : "Template 2"}</td>
+                    <td>{item.CompanyName}</td>
                     <td>{item.InTime}</td>
                     <td>{item.MeetingPerson}</td>
                     {item.AttachmentFiles.length != 0 ?

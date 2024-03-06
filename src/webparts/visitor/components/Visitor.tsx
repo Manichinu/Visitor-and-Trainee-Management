@@ -27,8 +27,15 @@ var NewWeb: any;
 
 
 export interface VisitorState {
+  VisitorSection: boolean;
+  TraineeSection: boolean;
   VisitorEntry: boolean;
   VisitorDetails: boolean;
+  CurrentUserName: string;
+  CurrentUserID: number;
+  UserInVisitorGroup: boolean;
+  UserInTrainingGroup: boolean;
+
 }
 
 export default class Visitor extends React.Component<IVisitorProps, VisitorState, {}> {
@@ -36,7 +43,13 @@ export default class Visitor extends React.Component<IVisitorProps, VisitorState
     super(props);
     this.state = {
       VisitorEntry: true,
-      VisitorDetails: false
+      VisitorDetails: false,
+      VisitorSection: true,
+      TraineeSection: false,
+      CurrentUserName: "",
+      CurrentUserID: 0,
+      UserInVisitorGroup: false,
+      UserInTrainingGroup: false,
     }
     NewWeb = Web("" + this.props.siteurl + "")
     console.log(NewWeb)
@@ -45,14 +58,92 @@ export default class Visitor extends React.Component<IVisitorProps, VisitorState
     $(".btn-log-out").toggle();
   }
   public componentDidMount() {
-    $(".header_part").on('click', function () {
-      $(".header_part").removeClass('active');
-      $(this).addClass('active');
-    })
     $(".side_navbar").on('click', function () {
       $(".side_navbar").removeClass('active');
       $(this).addClass('active');
     })
+    this.GetCurrentUserDetails()
+  }
+  public async GetCurrentUserDetails() {
+    await NewWeb.currentUser.get().then((user: any) => {
+      console.log(user);
+      this.setState({
+        CurrentUserName: user.Title,
+        CurrentUserID: user.Id
+      })
+    }, (errorResponse: any) => {
+    }
+    );
+    this.isUserinVisitorGroup()
+
+  }
+  public async isUserinVisitorGroup() {
+    var handler = this;
+
+    const ajaxRequest = () => {
+      return new Promise((resolve, reject) => {
+        $.ajax({
+          url: `${this.props.siteurl}/_api/web/sitegroups/getByName('Visitor Management Users')/Users?$filter=Id eq ${this.state.CurrentUserID}`,
+          type: "GET",
+          headers: { 'Accept': 'application/json; odata=verbose;' },
+          success: function (resultData) {
+            console.log(resultData);
+            resolve(resultData);
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            console.log("Error while checking user in Owner's group");
+            reject(errorThrown);
+          }
+        });
+      });
+    };
+
+    try {
+      const resultData: any = await ajaxRequest();
+
+      if (resultData.d.results.length !== 0) {
+        handler.setState({
+          UserInVisitorGroup: true
+        });
+      }
+
+      // Continue with the next function
+      this.isUserinTrainingGroup();
+    } catch (error) {
+      console.error("Error in isUserinVisitorGroup:", error);
+    }
+  }
+  public async isUserinTrainingGroup() {
+    var handler = this
+    $.ajax({
+      url: `${this.props.siteurl}/_api/web/sitegroups/getByName('Training Management Users')/Users?$filter=Id eq ${this.state.CurrentUserID}`,
+      type: "GET",
+      headers: { 'Accept': 'application/json; odata=verbose;' },
+      success: function (resultData) {
+        console.log(resultData)
+        if (resultData.d.results.length != 0) {
+          handler.setState({
+            UserInTrainingGroup: true
+          })
+          if (handler.state.UserInVisitorGroup == false) {
+            handler.TraineeSection()
+            $("#Training").addClass('active')
+          }
+        }
+      },
+
+      error: function (jqXHR, textStatus, errorThrown) {
+        console.log("Error while checking user in userTraining group");
+      }
+
+    });
+    setTimeout(() => {
+      $(".header_part").on('click', function () {
+        $(".header_part").removeClass('active');
+        $(this).addClass('active');
+      })
+    }, 200)
+
   }
   public visitorEntry() {
     this.setState({
@@ -66,7 +157,33 @@ export default class Visitor extends React.Component<IVisitorProps, VisitorState
       VisitorDetails: true
     })
   }
+  public VisitorSection() {
+    this.setState({
+      VisitorSection: true,
+      TraineeSection: false,
+      VisitorEntry: true,
+      VisitorDetails: false
+    })
+    setTimeout(() => {
+      $(".side_navbar").on('click', function () {
+        $(".side_navbar").removeClass('active');
+        $(this).addClass('active');
+      })
+    }, 200)
+  }
+  public TraineeSection() {
+    this.setState({
+      VisitorSection: false,
+      TraineeSection: true
+    })
+    setTimeout(() => {
+      $(".side_navbar").on('click', function () {
+        $(".side_navbar").removeClass('active');
+        $(this).addClass('active');
+      })
+    }, 200)
 
+  }
 
   public render(): React.ReactElement<IVisitorProps> {
     // const {
@@ -119,25 +236,29 @@ export default class Visitor extends React.Component<IVisitorProps, VisitorState
                   <ul>
                     <li>
                       <a href="#">
-                        <img src="https://remodigital.sharepoint.com/:f:/r/sites/Remo/RemoSolutions/VTM/SiteAssets/Visitor%20and%20Trainee%20Assets/images/icon.svg" className="calender" />Appointment Booking
+                        <img src="https://remodigital.sharepoint.com/:f:/r/sites/Remo/RemoSolutions/VTM/SiteAssets/Visitor%20and%20Trainee%20Assets/images/icon.svg" className="calender" />Visitor and Training Management
                         <div className="calender-dot">
 
                         </div>
                       </a>
                     </li>
-                    <li className="active header_part" id="store">
-                      <a href="#" className="showStoreClick">
-                        <img src="https://remodigital.sharepoint.com/:f:/r/sites/Remo/RemoSolutions/VTM/SiteAssets/Visitor%20and%20Trainee%20Assets/images/store.svg" className="store-img" />
-                        <img src="https://remodigital.sharepoint.com/:f:/r/sites/Remo/RemoSolutions/VTM/SiteAssets/Visitor%20and%20Trainee%20Assets/images/store-en.svg" className="store-img-h" /> Visitor
-                      </a>
-                    </li>
-                    <li className="header_part" id="event">
-                      <a href="#" className="showEventBookingClick">
-                        <img className="event-img" src="https://remodigital.sharepoint.com/:f:/r/sites/Remo/RemoSolutions/VTM/SiteAssets/Visitor%20and%20Trainee%20Assets/images/event.svg" alt="image" />
-                        <img className="event-img-h" src="https://remodigital.sharepoint.com/:f:/r/sites/Remo/RemoSolutions/VTM/SiteAssets/Visitor%20and%20Trainee%20Assets/images/event-h.svg" alt="image" />Trainee
+                    {this.state.UserInVisitorGroup == true &&
+                      <li className="active header_part" id="Visitor" onClick={() => this.VisitorSection()}>
+                        <a href="#" className="showStoreClick">
+                          <img src="https://remodigital.sharepoint.com/:f:/r/sites/Remo/RemoSolutions/VTM/SiteAssets/Visitor%20and%20Trainee%20Assets/images/store.svg" className="store-img" />
+                          <img src="https://remodigital.sharepoint.com/:f:/r/sites/Remo/RemoSolutions/VTM/SiteAssets/Visitor%20and%20Trainee%20Assets/images/store-en.svg" className="store-img-h" /> Visitor
+                        </a>
+                      </li>
+                    }
+                    {this.state.UserInTrainingGroup == true &&
+                      <li className="header_part" id="Training" onClick={() => this.TraineeSection()}>
+                        <a href="#" className="showEventBookingClick">
+                          <img className="event-img" src="https://remodigital.sharepoint.com/:f:/r/sites/Remo/RemoSolutions/VTM/SiteAssets/Visitor%20and%20Trainee%20Assets/images/event.svg" alt="image" />
+                          <img className="event-img-h" src="https://remodigital.sharepoint.com/:f:/r/sites/Remo/RemoSolutions/VTM/SiteAssets/Visitor%20and%20Trainee%20Assets/images/event-h.svg" alt="image" />Training
 
-                      </a>
-                    </li>
+                        </a>
+                      </li>
+                    }
                   </ul>
                 </div>
               </div>
@@ -147,24 +268,42 @@ export default class Visitor extends React.Component<IVisitorProps, VisitorState
             <div className="row store-wrap">
               <div className="column-1">
                 <ul className='left-nav-menus-stack'>
-                  <li className="active side_navbar" id='arrow-img' onClick={() => this.visitorEntry()}>
-                    <div className="clearfix booking add-store"> <a href="#" className="clearfix">
-                      <div className="f-left" id='add_store'><img src="https://remodigital.sharepoint.com/:f:/r/sites/Remo/RemoSolutions/VTM/SiteAssets/Visitor%20and%20Trainee%20Assets/images/store.svg" className="store-img" />Visitor Entry</div>
-                    </a></div>
-                  </li>
-                  <li className="side_navbar" id='arrow-img' onClick={() => this.visitorDetails()}>
-                    <div className="clearfix booking add-store"> <a href="#" className="clearfix">
-                      <div className="f-left" id='add_store'><img src="https://remodigital.sharepoint.com/:f:/r/sites/Remo/RemoSolutions/VTM/SiteAssets/Visitor%20and%20Trainee%20Assets/images/store.svg" className="store-img" />Visitor Details</div>
-                    </a></div>
-                  </li>
+                  {this.state.VisitorSection == true && this.state.UserInVisitorGroup == true &&
+                    <>
+                      <li className="active side_navbar" id='arrow-img' onClick={() => this.visitorEntry()}>
+                        <div className="clearfix booking add-store"> <a href="#" className="clearfix">
+                          <div className="f-left" id='add_store'><img src="https://remodigital.sharepoint.com/:f:/r/sites/Remo/RemoSolutions/VTM/SiteAssets/Visitor%20and%20Trainee%20Assets/images/store.svg" className="store-img" />Visitor Entry</div>
+                        </a></div>
+                      </li>
+                      <li className="side_navbar" id='arrow-img' onClick={() => this.visitorDetails()}>
+                        <div className="clearfix booking add-store"> <a href="#" className="clearfix">
+                          <div className="f-left" id='add_store'><img src="https://remodigital.sharepoint.com/:f:/r/sites/Remo/RemoSolutions/VTM/SiteAssets/Visitor%20and%20Trainee%20Assets/images/store.svg" className="store-img" />Visitor Details</div>
+                        </a></div>
+                      </li>
+                    </>
+                  }
+                  {this.state.TraineeSection == true &&
+                    <>
+                      <li className="active side_navbar" id='arrow-img'>
+                        <div className="clearfix booking add-store"> <a href="#" className="clearfix">
+                          <div className="f-left" id='add_store'><img src="https://remodigital.sharepoint.com/:f:/r/sites/Remo/RemoSolutions/VTM/SiteAssets/Visitor%20and%20Trainee%20Assets/images/store.svg" className="store-img" />Trainee Entry</div>
+                        </a></div>
+                      </li>
+                      <li className="side_navbar" id='arrow-img'>
+                        <div className="clearfix booking add-store"> <a href="#" className="clearfix">
+                          <div className="f-left" id='add_store'><img src="https://remodigital.sharepoint.com/:f:/r/sites/Remo/RemoSolutions/VTM/SiteAssets/Visitor%20and%20Trainee%20Assets/images/store.svg" className="store-img" />Trainee Invitee</div>
+                        </a></div>
+                      </li>
+                    </>
+                  }
 
                 </ul>
               </div>
               <div className='clearfix manual-right'>
-                {this.state.VisitorEntry == true &&
+                {this.state.VisitorEntry == true && this.state.VisitorSection == true && this.state.UserInVisitorGroup == true &&
                   <VisitorEntry siteurl={this.props.siteurl} />
                 }
-                {this.state.VisitorDetails == true &&
+                {this.state.VisitorDetails == true && this.state.VisitorSection == true && this.state.UserInVisitorGroup == true &&
                   <VisitorDetails siteurl={this.props.siteurl} />
                 }
 

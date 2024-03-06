@@ -40,12 +40,14 @@ export default class VisitorEntry extends React.Component<IVisitorProps, FormSta
 
     }
     public saveFormDetails() {
-        NewWeb.lists.getByTitle("Visitor Transaction").items.add({
+        var Date = $("#in_time").val()
+        var FormatDate = moment(Date).format('DD-MM-YYYY hh:mm A')
+        NewWeb.lists.getByTitle("Visitor User Transaction").items.add({
             Title: $("#name").val(),
             MobileNumber: $("#mobile_number").val(),
             EmiratesID: $("#emirates_id").val(),
             CompanyName: $("#company_name").val(),
-            InTime: $("#in_time").val(),
+            InTime: FormatDate,
             MeetingPerson: $("#meeting_person").val(),
             RequestID: "VISITOR-" + moment().format("DDMMYYYYHHmmss")
         }).then((item: any) => {
@@ -53,16 +55,64 @@ export default class VisitorEntry extends React.Component<IVisitorProps, FormSta
             var selectedFile: any = fileInput[0].files[0];
             console.log(selectedFile)
             let ID = item.data.Id;
-            NewWeb.lists.getByTitle("Visitor Transaction").items.getById(ID).attachmentFiles.add(selectedFile.name, selectedFile).then(() => {
-                swal({
-                    text: "Submitted successfully!",
-                    icon: "success",
-                }).then(() => {
-                    location.reload();
+            if (fileInput[0].files.length != 0) {
+                NewWeb.lists.getByTitle("Visitor User Transaction").items.getById(ID).attachmentFiles.add(selectedFile.name, selectedFile).then(() => {
+
                 })
+            }
+            NewWeb.lists.getByTitle("Visitor Master Transaction").items.add({
+                Title: $("#name").val(),
+                MobileNumber: $("#mobile_number").val(),
+                EmiratesID: $("#emirates_id").val(),
+                CompanyName: $("#company_name").val(),
+                RequestID: "VISITOR-" + moment().format("DDMMYYYYHHmmss")
+            }).then((item: any) => {
+                var fileInput: any = $("#photo")
+                var selectedFile: any = fileInput[0].files[0];
+                console.log(selectedFile)
+                let ID = item.data.Id;
+                if (fileInput[0].files.length != 0) {
+                    NewWeb.lists.getByTitle("Visitor Master Transaction").items.getById(ID).attachmentFiles.add(selectedFile.name, selectedFile).then(() => {
+                        swal({
+                            text: "Submitted successfully!",
+                            icon: "success",
+                        }).then(() => {
+                            location.reload();
+                        })
+                    })
+                } else {
+                    swal({
+                        text: "Submitted successfully!",
+                        icon: "success",
+                    }).then(() => {
+                        location.reload();
+                    })
+                }
             })
 
+
         })
+    }
+    public GetVisitorDetails() {
+        var Number = $("#mobile_number").val()
+        NewWeb.lists.getByTitle("Visitor Master Transaction").items.select("*").filter(`MobileNumber eq '${Number}'`).expand('AttachmentFiles').get()
+            .then((items: any) => {
+                if (items.length != 0) {
+                    swal({
+                        text: "User already exists!",
+                        icon: "warning",
+                    }).then(() => {
+                        $("#name").val(items[0].Title)
+                        $("#emirates_id").val(items[0].EmiratesID)
+                        $("#company_name").val(items[0].CompanyName)
+                    })
+
+                } else {
+                    $("#name").val("")
+                    $("#emirates_id").val("")
+                    $("#company_name").val("")
+                }
+            })
     }
     public render(): React.ReactElement<IVisitorProps> {
         // const {
@@ -78,7 +128,7 @@ export default class VisitorEntry extends React.Component<IVisitorProps, FormSta
                 <div className="add-event-page">
                     <div className="row">
                         <div className="col-md-3 required"><label htmlFor="fname">Mobile Number</label><span>*</span>
-                            <input type="text" id="mobile_number" autoComplete='off' className='form-control'
+                            <input type="text" onChange={() => this.GetVisitorDetails()} id="mobile_number" autoComplete='off' className='form-control'
                                 placeholder="Mobile Number"
                             />
                         </div>
@@ -100,7 +150,7 @@ export default class VisitorEntry extends React.Component<IVisitorProps, FormSta
                             />
                         </div>
                         <div className="col-md-3 required"><label htmlFor="fname">In Time</label><span>*</span>
-                            <input type="text" id="in_time" autoComplete='off' className='form-control'
+                            <input type="datetime-local" id="in_time" autoComplete='off' className='form-control'
                                 placeholder="In Time"
                             />
                         </div>
