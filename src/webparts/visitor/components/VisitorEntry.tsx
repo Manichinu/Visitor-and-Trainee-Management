@@ -27,6 +27,9 @@ export interface FormState {
     webcamRef: any;
     isWebcamActive: boolean;
     capturedPhoto: string;
+    UserAlreadyExists: boolean;
+    AttachmentCopies: any[];
+
 }
 
 export default class VisitorEntry extends React.Component<IVisitorProps, FormState, {}> {
@@ -36,6 +39,9 @@ export default class VisitorEntry extends React.Component<IVisitorProps, FormSta
             webcamRef: React.createRef(),
             isWebcamActive: false,
             capturedPhoto: "",
+            UserAlreadyExists: false,
+            AttachmentCopies: [],
+
         }
         NewWeb = Web("" + this.props.siteurl + "")
         this.handleSnapClick = this.handleSnapClick.bind(this);
@@ -60,26 +66,25 @@ export default class VisitorEntry extends React.Component<IVisitorProps, FormSta
             RequestID: "VISITOR-" + moment().format("DDMMYYYYHHmmss")
         }).then((item: any) => {
             let ID = item.data.Id;
-            if (this.state.capturedPhoto != "") {
-                NewWeb.lists.getByTitle("Visitor User Transaction").items.getById(ID).attachmentFiles.add("User_photo.jpg", photoBlob).then(() => {
-
+            if (this.state.UserAlreadyExists == false) {
+                NewWeb.lists.getByTitle("Visitor User Transaction").items.getById(ID).attachmentFiles.add("User_photo.jpg", photoBlob)
+            } else {
+                NewWeb.lists.getByTitle("Visitor User Transaction").items.getById(ID).attachmentFiles.add(this.state.AttachmentCopies)
+            }
+            if (this.state.UserAlreadyExists == false) {
+                NewWeb.lists.getByTitle("Visitor Master Transaction").items.add({
+                    Title: $("#name").val(),
+                    MobileNumber: $("#mobile_number").val(),
+                    EmiratesID: $("#emirates_id").val(),
+                    CompanyName: $("#company_name").val(),
+                    RequestID: "VISITOR-" + moment().format("DDMMYYYYHHmmss")
+                }).then((item: any) => {
+                    let ID = item.data.Id;
+                    if (this.state.capturedPhoto != "") {
+                        NewWeb.lists.getByTitle("Visitor Master Transaction").items.getById(ID).attachmentFiles.add("User_photo.jpg", photoBlob)
+                    }
                 })
             }
-            NewWeb.lists.getByTitle("Visitor Master Transaction").items.add({
-                Title: $("#name").val(),
-                MobileNumber: $("#mobile_number").val(),
-                EmiratesID: $("#emirates_id").val(),
-                CompanyName: $("#company_name").val(),
-                RequestID: "VISITOR-" + moment().format("DDMMYYYYHHmmss")
-            }).then((item: any) => {
-                let ID = item.data.Id;
-                if (this.state.capturedPhoto != "") {
-                    NewWeb.lists.getByTitle("Visitor Master Transaction").items.getById(ID).attachmentFiles.add("User_photo.jpg", photoBlob).then(() => {
-
-                    })
-                }
-            })
-
 
         }).then(() => {
             swal({
@@ -95,6 +100,7 @@ export default class VisitorEntry extends React.Component<IVisitorProps, FormSta
         NewWeb.lists.getByTitle("Visitor Master Transaction").items.select("*").filter(`MobileNumber eq '${Number}'`).expand('AttachmentFiles').get()
             .then((items: any) => {
                 if (items.length != 0) {
+                    console.log("userDate", items)
                     swal({
                         text: "User already exists!",
                         icon: "warning",
@@ -102,14 +108,51 @@ export default class VisitorEntry extends React.Component<IVisitorProps, FormSta
                         $("#name").val(items[0].Title)
                         $("#emirates_id").val(items[0].EmiratesID)
                         $("#company_name").val(items[0].CompanyName)
+                        this.GetAttachmentContent(items[0].ID)
+                        this.setState({
+                            UserAlreadyExists: true,
+                            capturedPhoto: "https://remodigital.sharepoint.com" + items[0].AttachmentFiles[0].ServerRelativeUrl
+                        })
                     })
 
                 } else {
                     $("#name").val("")
                     $("#emirates_id").val("")
                     $("#company_name").val("")
+                    this.setState({
+                        UserAlreadyExists: false,
+                        capturedPhoto: ""
+                    })
                 }
             })
+    }
+    private async GetAttachmentContent(sourceItemId: number) {
+        var Files = []
+        try {
+            // Get attachments from the source list item
+            const sourceListAttachments = await NewWeb.lists.getByTitle("Visitor Master Transaction").items.getById(sourceItemId).attachmentFiles.get();
+            console.log(sourceListAttachments);
+
+            // Transfer attachments to another list
+            for (const attachment of sourceListAttachments) {
+                // Get the content of each attachment
+                const attachmentFile = await NewWeb.getFileByServerRelativeUrl(attachment.ServerRelativeUrl);
+                const attachmentContent = await attachmentFile.getBlob();
+                console.log(attachmentContent);
+                Files.push({
+                    "name": "User_photo.jpg",
+                    "content": attachmentContent
+                });
+                this
+            }
+            this.setState({
+                AttachmentCopies: Files
+            })
+
+            console.log("Attachments transferred successfully to the destination list");
+        } catch (error) {
+            console.error("Error transferring attachments", error);
+        }
     }
     private handleSnapClick() {
         const photoDataUrl = this.state.webcamRef.current.getScreenshot();
@@ -178,23 +221,34 @@ export default class VisitorEntry extends React.Component<IVisitorProps, FormSta
                     </div>
                     <div className="row">
                         <div className="col-md-3 required"><label htmlFor="fname">Photo</label><span>*</span>
-                            {isWebcamActive ? (
-                                <Webcam
-                                    audio={false}
-                                    ref={this.state.webcamRef}
-                                    screenshotFormat="image/jpeg"
-                                />
-                            ) : (
+                            {this.state.UserAlreadyExists === false && (
                                 <>
-                                    {capturedPhoto ? (
-                                        <img src={capturedPhoto} alt="Captured" style={{ width: "100px", height: "100px" }} />
+                                    {this.state.isWebcamActive ? (
+                                        <Webcam
+                                            audio={false}
+                                            ref={this.state.webcamRef}
+                                            screenshotFormat="image/jpeg"
+                                        />
                                     ) : (
-                                        <button onClick={() => this.setState({ isWebcamActive: true })}>
-                                            Take Photo
-                                        </button>
+                                        <>
+                                            {this.state.capturedPhoto ? (
+                                                <img
+                                                    src={this.state.capturedPhoto}
+                                                    alt="Captured"
+                                                    style={{ width: "100px", height: "100px" }}
+                                                />
+                                            ) : (
+                                                <button onClick={() => this.setState({ isWebcamActive: true })}>
+                                                    Take Photo
+                                                </button>
+                                            )}
+                                        </>
                                     )}
                                 </>
                             )}
+                            {this.state.UserAlreadyExists == true &&
+                                <a href={capturedPhoto} target='_blank'>User_photo.jpg</a>}
+
                             {isWebcamActive && (
                                 <button onClick={this.handleSnapClick}>Click Snap</button>
                             )}
@@ -204,7 +258,7 @@ export default class VisitorEntry extends React.Component<IVisitorProps, FormSta
                     <div className="row send-invite-btn-wrap">
                         <div className="send_button required"><div className="w-130 td-div send-invite"><button className="btn-wrap" onClick={() => this.saveFormDetails()}>Submit</button></div></div>
                     </div>
-                </div>
+                </div >
 
 
             </>
