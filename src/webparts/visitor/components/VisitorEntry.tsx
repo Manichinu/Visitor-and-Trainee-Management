@@ -14,7 +14,7 @@ import { Web } from "@pnp/sp/webs";
 import swal from "sweetalert";
 import * as moment from "moment";
 import * as $ from "jquery";
-
+import Webcam from "react-webcam";
 
 SPComponentLoader.loadCss(`https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css`);
 SPComponentLoader.loadCss(`https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css`);
@@ -24,24 +24,32 @@ SPComponentLoader.loadCss('https://remodigital.sharepoint.com/:f:/r/sites/Remo/R
 var NewWeb: any;
 
 export interface FormState {
-
+    webcamRef: any;
+    isWebcamActive: boolean;
+    capturedPhoto: string;
 }
 
 export default class VisitorEntry extends React.Component<IVisitorProps, FormState, {}> {
     public constructor(props: IVisitorProps, state: FormState) {
         super(props);
         this.state = {
-
+            webcamRef: React.createRef(),
+            isWebcamActive: false,
+            capturedPhoto: "",
         }
         NewWeb = Web("" + this.props.siteurl + "")
-
+        this.handleSnapClick = this.handleSnapClick.bind(this);
     }
     public componentDidMount() {
 
     }
-    public saveFormDetails() {
+    public async saveFormDetails() {
         var Date = $("#in_time").val()
         var FormatDate = moment(Date).format('DD-MM-YYYY hh:mm A')
+        let photoBlob: any;
+        if (this.state.capturedPhoto != "") {
+            photoBlob = this.dataURItoBlob(this.state.capturedPhoto);
+        }
         NewWeb.lists.getByTitle("Visitor User Transaction").items.add({
             Title: $("#name").val(),
             MobileNumber: $("#mobile_number").val(),
@@ -51,12 +59,9 @@ export default class VisitorEntry extends React.Component<IVisitorProps, FormSta
             MeetingPerson: $("#meeting_person").val(),
             RequestID: "VISITOR-" + moment().format("DDMMYYYYHHmmss")
         }).then((item: any) => {
-            var fileInput: any = $("#photo")
-            var selectedFile: any = fileInput[0].files[0];
-            console.log(selectedFile)
             let ID = item.data.Id;
-            if (fileInput[0].files.length != 0) {
-                NewWeb.lists.getByTitle("Visitor User Transaction").items.getById(ID).attachmentFiles.add(selectedFile.name, selectedFile).then(() => {
+            if (this.state.capturedPhoto != "") {
+                NewWeb.lists.getByTitle("Visitor User Transaction").items.getById(ID).attachmentFiles.add("User_photo.jpg", photoBlob).then(() => {
 
                 })
             }
@@ -67,30 +72,22 @@ export default class VisitorEntry extends React.Component<IVisitorProps, FormSta
                 CompanyName: $("#company_name").val(),
                 RequestID: "VISITOR-" + moment().format("DDMMYYYYHHmmss")
             }).then((item: any) => {
-                var fileInput: any = $("#photo")
-                var selectedFile: any = fileInput[0].files[0];
-                console.log(selectedFile)
                 let ID = item.data.Id;
-                if (fileInput[0].files.length != 0) {
-                    NewWeb.lists.getByTitle("Visitor Master Transaction").items.getById(ID).attachmentFiles.add(selectedFile.name, selectedFile).then(() => {
-                        swal({
-                            text: "Submitted successfully!",
-                            icon: "success",
-                        }).then(() => {
-                            location.reload();
-                        })
-                    })
-                } else {
-                    swal({
-                        text: "Submitted successfully!",
-                        icon: "success",
-                    }).then(() => {
-                        location.reload();
+                if (this.state.capturedPhoto != "") {
+                    NewWeb.lists.getByTitle("Visitor Master Transaction").items.getById(ID).attachmentFiles.add("User_photo.jpg", photoBlob).then(() => {
+
                     })
                 }
             })
 
 
+        }).then(() => {
+            swal({
+                text: "Submitted successfully!",
+                icon: "success",
+            }).then(() => {
+                location.reload();
+            })
         })
     }
     public GetVisitorDetails() {
@@ -114,6 +111,25 @@ export default class VisitorEntry extends React.Component<IVisitorProps, FormSta
                 }
             })
     }
+    private handleSnapClick() {
+        const photoDataUrl = this.state.webcamRef.current.getScreenshot();
+        this.setState({
+            isWebcamActive: false,
+            capturedPhoto: photoDataUrl,
+        });
+        console.log(photoDataUrl)
+    };
+    public dataURItoBlob(dataURI: string) {
+        const byteString = atob(dataURI.split(",")[1]);
+        const ab = new ArrayBuffer(byteString.length);
+        const ia = new Uint8Array(ab);
+
+        for (let i = 0; i < byteString.length; i++) {
+            ia[i] = byteString.charCodeAt(i);
+        }
+
+        return new Blob([ab], { type: "image/jpeg" });
+    }
     public render(): React.ReactElement<IVisitorProps> {
         // const {
         //   description,
@@ -122,7 +138,7 @@ export default class VisitorEntry extends React.Component<IVisitorProps, FormSta
         //   hasTeamsContext,
         //   userDisplayName
         // } = this.props;
-
+        const { isWebcamActive, capturedPhoto } = this.state;
         return (
             <>
                 <div className="add-event-page">
@@ -162,9 +178,26 @@ export default class VisitorEntry extends React.Component<IVisitorProps, FormSta
                     </div>
                     <div className="row">
                         <div className="col-md-3 required"><label htmlFor="fname">Photo</label><span>*</span>
-                            <input type="file" id="photo" autoComplete='off' className='form-control'
-                                placeholder="photo"
-                            />
+                            {isWebcamActive ? (
+                                <Webcam
+                                    audio={false}
+                                    ref={this.state.webcamRef}
+                                    screenshotFormat="image/jpeg"
+                                />
+                            ) : (
+                                <>
+                                    {capturedPhoto ? (
+                                        <img src={capturedPhoto} alt="Captured" style={{ width: "100px", height: "100px" }} />
+                                    ) : (
+                                        <button onClick={() => this.setState({ isWebcamActive: true })}>
+                                            Take Photo
+                                        </button>
+                                    )}
+                                </>
+                            )}
+                            {isWebcamActive && (
+                                <button onClick={this.handleSnapClick}>Click Snap</button>
+                            )}
                         </div>
 
                     </div>
@@ -172,6 +205,7 @@ export default class VisitorEntry extends React.Component<IVisitorProps, FormSta
                         <div className="send_button required"><div className="w-130 td-div send-invite"><button className="btn-wrap" onClick={() => this.saveFormDetails()}>Submit</button></div></div>
                     </div>
                 </div>
+
 
             </>
         );
