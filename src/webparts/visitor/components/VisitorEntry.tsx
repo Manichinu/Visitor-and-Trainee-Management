@@ -29,7 +29,7 @@ export interface FormState {
     capturedPhoto: string;
     UserAlreadyExists: boolean;
     AttachmentCopies: any[];
-
+    PhotoName: string;
 }
 
 export default class VisitorEntry extends React.Component<IVisitorProps, FormState, {}> {
@@ -41,7 +41,7 @@ export default class VisitorEntry extends React.Component<IVisitorProps, FormSta
             capturedPhoto: "",
             UserAlreadyExists: false,
             AttachmentCopies: [],
-
+            PhotoName: ""
         }
         NewWeb = Web("" + this.props.siteurl + "")
         this.handleSnapClick = this.handleSnapClick.bind(this);
@@ -63,15 +63,15 @@ export default class VisitorEntry extends React.Component<IVisitorProps, FormSta
             CompanyName: $("#company_name").val(),
             InTime: FormatDate,
             MeetingPerson: $("#meeting_person").val(),
-            RequestID: "VISITOR-" + moment().format("DDMMYYYYHHmmss")
+            RequestID: "VISITOR-" + moment().format("DDMMYYYYHHmmss"),
+            IsFirstTime: this.state.UserAlreadyExists == false ? true : false,
+            PhotoName: this.state.PhotoName,
+            PhotoURL: this.state.UserAlreadyExists == false ? "" : this.state.capturedPhoto
         }).then((item: any) => {
             let ID = item.data.Id;
             if (this.state.UserAlreadyExists == false) {
                 NewWeb.lists.getByTitle("Visitor User Transaction").items.getById(ID).attachmentFiles.add("User_photo.jpg", photoBlob)
-            } else {
-                NewWeb.lists.getByTitle("Visitor User Transaction").items.getById(ID).attachmentFiles.add(this.state.AttachmentCopies)
-            }
-            if (this.state.UserAlreadyExists == false) {
+
                 NewWeb.lists.getByTitle("Visitor Master Transaction").items.add({
                     Title: $("#name").val(),
                     MobileNumber: $("#mobile_number").val(),
@@ -108,10 +108,11 @@ export default class VisitorEntry extends React.Component<IVisitorProps, FormSta
                         $("#name").val(items[0].Title)
                         $("#emirates_id").val(items[0].EmiratesID)
                         $("#company_name").val(items[0].CompanyName)
-                        this.GetAttachmentContent(items[0].ID)
+                        // this.GetAttachmentContent(items[0].ID)
                         this.setState({
                             UserAlreadyExists: true,
-                            capturedPhoto: "https://remodigital.sharepoint.com" + items[0].AttachmentFiles[0].ServerRelativeUrl
+                            PhotoName: items[0].AttachmentFiles[0].FileName,
+                            capturedPhoto: items[0].AttachmentFiles[0].ServerRelativeUrl
                         })
                     })
 
@@ -121,41 +122,42 @@ export default class VisitorEntry extends React.Component<IVisitorProps, FormSta
                     $("#company_name").val("")
                     this.setState({
                         UserAlreadyExists: false,
-                        capturedPhoto: ""
+                        capturedPhoto: "",
+                        PhotoName: ""
                     })
                 }
             })
     }
-    private async GetAttachmentContent(sourceItemId: number) {
-        var Files = []
-        try {
-            // Get attachments from the source list item
-            const sourceListAttachments = await NewWeb.lists.getByTitle("Visitor Master Transaction").items.getById(sourceItemId).attachmentFiles.get();
-            console.log(sourceListAttachments);
+    // private async GetAttachmentContent(sourceItemId: number) {
+    //     var Files = []
+    //     try {
+    //         // Get attachments from the source list item
+    //         const sourceListAttachments = await NewWeb.lists.getByTitle("Visitor Master Transaction").items.getById(sourceItemId).attachmentFiles.get();
+    //         console.log(sourceListAttachments);
 
-            // Transfer attachments to another list
-            for (const attachment of sourceListAttachments) {
-                // Get the content of each attachment
-                const attachmentFile = await NewWeb.getFileByServerRelativeUrl(attachment.ServerRelativeUrl);
-                const attachmentContent = await attachmentFile.getBlob().then((file: any) => {
-                    console.log("File", file)
-                });
-                console.log(attachmentContent);
-                Files.push({
-                    name: "User_photo.jpg",
-                    content: attachmentContent
-                });
-                this
-            }
-            this.setState({
-                AttachmentCopies: Files
-            })
+    //         // Transfer attachments to another list
+    //         for (const attachment of sourceListAttachments) {
+    //             // Get the content of each attachment
+    //             const attachmentFile = await NewWeb.getFileByServerRelativeUrl(attachment.ServerRelativeUrl);
+    //             const attachmentContent = await attachmentFile.getBlob().then((file: any) => {
+    //                 console.log("File", file)
+    //             });
+    //             console.log(attachmentContent);
+    //             Files.push({
+    //                 name: "User_photo.jpg",
+    //                 content: attachmentContent
+    //             });
+    //             this
+    //         }
+    //         this.setState({
+    //             AttachmentCopies: Files
+    //         })
 
-            console.log("Attachments transferred successfully to the destination list");
-        } catch (error) {
-            console.error("Error transferring attachments", error);
-        }
-    }
+    //         console.log("Attachments transferred successfully to the destination list");
+    //     } catch (error) {
+    //         console.error("Error transferring attachments", error);
+    //     }
+    // }
     private handleSnapClick() {
         const photoDataUrl = this.state.webcamRef.current.getScreenshot();
         this.setState({
@@ -183,7 +185,7 @@ export default class VisitorEntry extends React.Component<IVisitorProps, FormSta
         //   hasTeamsContext,
         //   userDisplayName
         // } = this.props;
-        const { isWebcamActive, capturedPhoto } = this.state;
+        const { isWebcamActive, capturedPhoto, PhotoName } = this.state;
         return (
             <>
                 <div className="add-event-page">
@@ -249,7 +251,7 @@ export default class VisitorEntry extends React.Component<IVisitorProps, FormSta
                                 </>
                             )}
                             {this.state.UserAlreadyExists == true &&
-                                <a href={capturedPhoto} target='_blank'>User_photo.jpg</a>}
+                                <a href={capturedPhoto} target='_blank'>{PhotoName}</a>}
 
                             {isWebcamActive && (
                                 <button onClick={this.handleSnapClick}>Click Snap</button>

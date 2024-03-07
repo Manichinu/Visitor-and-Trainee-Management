@@ -89,13 +89,17 @@ export default class VisitorDetails extends React.Component<IVisitorProps, FormS
                     <td>{item.CompanyName}</td>
                     <td>{item.InTime}</td>
                     <td>{item.MeetingPerson}</td>
-                    {item.AttachmentFiles.length != 0 ?
-                        <td>{item.AttachmentFiles.map((data: any) => {
-                            return (
-                                <a href={data.ServerRelativeUrl} target='blank'>{data.FileName}</a>
-                            )
-                        })}</td> :
-                        <td>-</td>
+                    {item.IsFirstTime == true ?
+                        (item.AttachmentFiles.length != 0 ?
+                            <td>{item.AttachmentFiles.map((data: any) => {
+                                return (
+                                    <a href={data.ServerRelativeUrl} target='blank'>{data.FileName}</a>
+                                )
+                            })}</td> :
+                            <td>-</td>
+                        ) : (
+                            <td><a href={item.PhotoURL} target='blank'>{item.PhotoName}</a></td>
+                        )
                     }
                 </tr>
             );
