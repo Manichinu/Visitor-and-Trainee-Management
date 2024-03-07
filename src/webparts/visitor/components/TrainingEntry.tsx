@@ -58,6 +58,8 @@ export interface FormState {
     CurrentView: any;
     EditScreen: boolean;
     EditItemID: number;
+    PreviousFiles: any[];
+    EditRequestID: any;
 }
 
 export default class TrainingEntry extends React.Component<IVisitorProps, FormState, {}> {
@@ -69,7 +71,9 @@ export default class TrainingEntry extends React.Component<IVisitorProps, FormSt
             SelectedEventItems: [],
             CurrentView: "month",
             EditScreen: false,
-            EditItemID: 0
+            EditItemID: 0,
+            PreviousFiles: [],
+            EditRequestID: ""
         }
         NewWeb = Web("" + this.props.siteurl + "")
         this.handleNavigate = this.handleNavigate.bind(this);
@@ -184,7 +188,8 @@ export default class TrainingEntry extends React.Component<IVisitorProps, FormSt
         $("#table-example").hide();
         $("#form").show();
         handler.setState({
-            CurrentView: "month"
+            CurrentView: "month",
+            EditScreen: false
         })
     }
     public async handleEventClick(event: any, e: React.SyntheticEvent): Promise<void> {
@@ -252,6 +257,7 @@ export default class TrainingEntry extends React.Component<IVisitorProps, FormSt
                 $("#end_date").val(moment(items[0].EndDate, "DD-MM-YYYY hh:mm A").format("YYYY-MM-DDTHH:mm"))
                 $("#per_slot").val(items[0].MaximumPerSlot)
                 $("#employee_category").val(items[0].EmployeeCategory)
+                this.getFilesFromLibrary(items[0].RequestID)
 
             }
         })
@@ -269,6 +275,23 @@ export default class TrainingEntry extends React.Component<IVisitorProps, FormSt
             EndDate: FormatEndDate,
             MaximumPerSlot: $("#per_slot").val(),
             EmployeeCategory: $("#employee_category").val(),
+        }).then(async () => {
+            var FoldeName = $("#training_name").val()
+
+            var FileInput: any = $("#attachments")
+            var Files = FileInput[0].files
+            if (Files.length != 0) {
+                for (var i = 0; i < Files.length; i++) {
+                    const data = await NewWeb.getFolderByServerRelativeUrl(
+                        this.props.context.pageContext.web.serverRelativeUrl + `/Training Attachments/${FoldeName}`
+                    ).files.add(Files[i].name, Files[i], true);
+
+                    const fileItem = await data.file.getItem();
+                    await fileItem.update({
+                        RequestID: this.state.EditRequestID,
+                    });
+                }
+            }
         }).then(() => {
             swal({
                 text: "Updated successfully!",
@@ -277,6 +300,25 @@ export default class TrainingEntry extends React.Component<IVisitorProps, FormSt
                 location.reload();
             })
         })
+    }
+    public async getFilesFromLibrary(id: any) {
+        this.setState({
+            EditRequestID: id
+        })
+        await NewWeb.lists.getByTitle('Training Attachments')
+            .items
+            .select('*')
+            .filter(`RequestID eq '${id}'`)
+            .expand("File")
+            .get()
+            .then((files: any) => {
+                if (files.length != 0) {
+                    console.log("Files", files)
+                    this.setState({
+                        PreviousFiles: files
+                    })
+                }
+            })
     }
 
     public render(): React.ReactElement<IVisitorProps> {
@@ -351,6 +393,15 @@ export default class TrainingEntry extends React.Component<IVisitorProps, FormSt
                             <input type="file" id="attachments" autoComplete='off' className='form-control'
                                 multiple
                             />
+                            <div>
+                                {this.state.EditScreen == true && (
+                                    this.state.PreviousFiles.map((item) => {
+                                        return (
+                                            <a href={item.File.ServerRelativeUrl} target='_blank'>{item.File.Name}</a>
+                                        )
+                                    })
+                                )}
+                            </div>
                         </div>
 
                     </div>
