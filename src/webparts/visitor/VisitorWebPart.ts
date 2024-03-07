@@ -31,6 +31,8 @@ export default class VisitorWebPart extends BaseClientSideWebPart<IVisitorWebPar
         // hasTeamsContext: !!this.context.sdks.microsoftTeams,
         // userDisplayName: this.context.pageContext.user.displayName,
         siteurl: this.context.pageContext.web.absoluteUrl,
+        context: this.context,
+
 
       }
     );

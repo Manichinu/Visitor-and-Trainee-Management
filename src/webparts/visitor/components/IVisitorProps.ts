@@ -1,3 +1,6 @@
+import { WebPartContext } from "@microsoft/sp-webpart-base";
+
+
 export interface IVisitorProps {
   // description: string;
   // isDarkTheme: boolean;
@@ -5,4 +8,6 @@ export interface IVisitorProps {
   // hasTeamsContext: boolean;
   // userDisplayName: string;
   siteurl: string;
+  context: WebPartContext;
+
 }

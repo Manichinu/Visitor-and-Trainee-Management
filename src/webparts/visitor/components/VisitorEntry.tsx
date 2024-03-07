@@ -69,8 +69,9 @@ export default class VisitorEntry extends React.Component<IVisitorProps, FormSta
             PhotoURL: this.state.UserAlreadyExists == false ? "" : this.state.capturedPhoto
         }).then((item: any) => {
             let ID = item.data.Id;
+            var Filename = $("#name").val() + ".jpg"
             if (this.state.UserAlreadyExists == false) {
-                NewWeb.lists.getByTitle("Visitor User Transaction").items.getById(ID).attachmentFiles.add("User_photo.jpg", photoBlob)
+                NewWeb.lists.getByTitle("Visitor User Transaction").items.getById(ID).attachmentFiles.add(Filename, photoBlob)
 
                 NewWeb.lists.getByTitle("Visitor Master Transaction").items.add({
                     Title: $("#name").val(),
@@ -81,7 +82,7 @@ export default class VisitorEntry extends React.Component<IVisitorProps, FormSta
                 }).then((item: any) => {
                     let ID = item.data.Id;
                     if (this.state.capturedPhoto != "") {
-                        NewWeb.lists.getByTitle("Visitor Master Transaction").items.getById(ID).attachmentFiles.add("User_photo.jpg", photoBlob)
+                        NewWeb.lists.getByTitle("Visitor Master Transaction").items.getById(ID).attachmentFiles.add(Filename, photoBlob)
                     }
                 })
             }
@@ -185,7 +186,7 @@ export default class VisitorEntry extends React.Component<IVisitorProps, FormSta
         //   hasTeamsContext,
         //   userDisplayName
         // } = this.props;
-        const { isWebcamActive, capturedPhoto, PhotoName } = this.state;
+        const { isWebcamActive } = this.state;
         return (
             <>
                 <div className="add-event-page">
@@ -225,33 +226,34 @@ export default class VisitorEntry extends React.Component<IVisitorProps, FormSta
                     </div>
                     <div className="row">
                         <div className="col-md-3 required"><label htmlFor="fname">Photo</label><span>*</span>
-                            {this.state.UserAlreadyExists === false && (
+                            {/* {this.state.UserAlreadyExists === false && (
+                                <> */}
+                            {this.state.isWebcamActive ? (
+                                <Webcam
+                                    audio={false}
+                                    ref={this.state.webcamRef}
+                                    screenshotFormat="image/jpeg"
+                                />
+                            ) : (
                                 <>
-                                    {this.state.isWebcamActive ? (
-                                        <Webcam
-                                            audio={false}
-                                            ref={this.state.webcamRef}
-                                            screenshotFormat="image/jpeg"
+                                    {this.state.capturedPhoto ? (
+                                        <img
+                                            src={this.state.capturedPhoto}
+                                            alt="Captured"
+                                            style={{ width: "100px", height: "100px" }}
                                         />
                                     ) : (
-                                        <>
-                                            {this.state.capturedPhoto ? (
-                                                <img
-                                                    src={this.state.capturedPhoto}
-                                                    alt="Captured"
-                                                    style={{ width: "100px", height: "100px" }}
-                                                />
-                                            ) : (
-                                                <button onClick={() => this.setState({ isWebcamActive: true })}>
-                                                    Take Photo
-                                                </button>
-                                            )}
-                                        </>
+                                        <button onClick={() => this.setState({ isWebcamActive: true })}>
+                                            Take Photo
+                                        </button>
                                     )}
                                 </>
                             )}
-                            {this.state.UserAlreadyExists == true &&
-                                <a href={capturedPhoto} target='_blank'>{PhotoName}</a>}
+                            {/* </>
+                            )} */}
+                            {/* {this.state.UserAlreadyExists == true &&
+                                <a href={capturedPhoto} target='_blank'>{PhotoName}</a>
+                                } */}
 
                             {isWebcamActive && (
                                 <button onClick={this.handleSnapClick}>Click Snap</button>
