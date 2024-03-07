@@ -56,31 +56,37 @@ export default class TrainingEntry extends React.Component<IVisitorProps, FormSt
     public componentDidMount() {
     }
     public async saveFormDetails() {
+        var StartDate = $("#start_date").val()
+        var FormatStartDate = moment(StartDate).format('DD-MM-YYYY hh:mm A')
+        var EndDate = $("#end_date").val()
+        var FormatEndDate = moment(EndDate).format('DD-MM-YYYY hh:mm A')
         var RequestID = "Training-" + moment().format("DDMMYYYYHHmmss")
-        NewWeb.lists.getByTitle("Training Transaction").items.add({
+        NewWeb.lists.getByTitle("Training Master Transaction").items.add({
             Title: $("#training_name").val(),
             TrainingType: $("#training_type").val(),
             Venue: $("#venue").val(),
-            StartDate: $("#start_date").val(),
-            EndDate: $("#end_date").val(),
+            StartDate: FormatStartDate,
+            EndDate: FormatEndDate,
             MaximumPerSlot: $("#per_slot").val(),
             RequestID: RequestID,
             EmployeeCategory: $("#employee_category").val(),
         }).then(async () => {
             var FoldeName = $("#training_name").val()
-            NewWeb.lists.getByTitle('Training Attachments').rootFolder.folders.add(FoldeName);
 
             var FileInput: any = $("#attachments")
             var Files = FileInput[0].files
-            for (var i = 0; i < Files.length; i++) {
-                const data = await NewWeb.getFolderByServerRelativeUrl(
-                    this.props.context.pageContext.web.serverRelativeUrl + `/Training Attachments/${FoldeName}`
-                ).files.add(Files[i].name, Files[i], true);
+            if (Files.length != 0) {
+                NewWeb.lists.getByTitle('Training Attachments').rootFolder.folders.add(FoldeName);
+                for (var i = 0; i < Files.length; i++) {
+                    const data = await NewWeb.getFolderByServerRelativeUrl(
+                        this.props.context.pageContext.web.serverRelativeUrl + `/Training Attachments/${FoldeName}`
+                    ).files.add(Files[i].name, Files[i], true);
 
-                const fileItem = await data.file.getItem();
-                await fileItem.update({
-                    RequestID: RequestID,
-                });
+                    const fileItem = await data.file.getItem();
+                    await fileItem.update({
+                        RequestID: RequestID,
+                    });
+                }
             }
 
         }).then(() => {
@@ -154,12 +160,12 @@ export default class TrainingEntry extends React.Component<IVisitorProps, FormSt
                     </div>
                     <div className="row">
                         <div className="col-md-3 required"><label>Start Date</label><span>*</span>
-                            <input type="date" id="start_date" autoComplete='off' className='form-control'
+                            <input type="datetime-local" id="start_date" autoComplete='off' className='form-control'
                                 placeholder="Start Date"
                             />
                         </div>
                         <div className="col-md-3 required"><label>End Date</label><span>*</span>
-                            <input type="date" id="end_date" autoComplete='off' className='form-control'
+                            <input type="datetime-local" id="end_date" autoComplete='off' className='form-control'
                                 placeholder="End Date"
                             />
                         </div>

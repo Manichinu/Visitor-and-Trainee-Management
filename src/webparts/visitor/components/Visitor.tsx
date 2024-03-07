@@ -15,6 +15,7 @@ import { Web } from "@pnp/sp/webs";
 import VisitorDetails from './VisitorDetails';
 import TrainingEntry from './TrainingEntry';
 import TrainingInvitee from './TrainingInvitee';
+import TrainingNominees from './TrainingNominees';
 
 
 SPComponentLoader.loadCss(`https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css`);
@@ -37,6 +38,7 @@ export interface VisitorState {
   UserInTrainingGroup: boolean;
   TrainingEntry: boolean;
   TrainingInvitee: boolean;
+  TrainingNominee: boolean;
 
 }
 
@@ -53,7 +55,8 @@ export default class Visitor extends React.Component<IVisitorProps, VisitorState
       UserInVisitorGroup: false,
       UserInTrainingGroup: false,
       TrainingEntry: false,
-      TrainingInvitee: false
+      TrainingInvitee: false,
+      TrainingNominee: false
     }
     NewWeb = Web("" + this.props.siteurl + "")
     console.log(NewWeb)
@@ -164,13 +167,22 @@ export default class Visitor extends React.Component<IVisitorProps, VisitorState
   public trainingEntry() {
     this.setState({
       TrainingEntry: true,
-      TrainingInvitee: false
+      TrainingInvitee: false,
+      TrainingNominee: false
     })
   }
   public trainingInvitee() {
     this.setState({
       TrainingInvitee: true,
-      TrainingEntry: false
+      TrainingEntry: false,
+      TrainingNominee: false
+    })
+  }
+  public trainingNominee() {
+    this.setState({
+      TrainingInvitee: false,
+      TrainingEntry: false,
+      TrainingNominee: true
     })
   }
   public VisitorSection() {
@@ -192,7 +204,8 @@ export default class Visitor extends React.Component<IVisitorProps, VisitorState
       VisitorSection: false,
       TraineeSection: true,
       TrainingEntry: true,
-      TrainingInvitee: false
+      TrainingInvitee: false,
+      TrainingNominee: false
     })
     setTimeout(() => {
       $(".side_navbar").on('click', function () {
@@ -304,12 +317,17 @@ export default class Visitor extends React.Component<IVisitorProps, VisitorState
                     <>
                       <li className="active side_navbar" id='arrow-img' onClick={() => this.trainingEntry()}>
                         <div className="clearfix booking add-store"> <a href="#" className="clearfix">
-                          <div className="f-left" id='add_store'><img src="https://remodigital.sharepoint.com/:f:/r/sites/Remo/RemoSolutions/VTM/SiteAssets/Visitor%20and%20Trainee%20Assets/images/store.svg" className="store-img" />Training Entry</div>
+                          <div className="f-left" id='add_store'><img src="https://remodigital.sharepoint.com/:f:/r/sites/Remo/RemoSolutions/VTM/SiteAssets/Visitor%20and%20Trainee%20Assets/images/store.svg" className="store-img" />Create Training</div>
                         </a></div>
                       </li>
                       <li className="side_navbar" id='arrow-img' onClick={() => this.trainingInvitee()}>
                         <div className="clearfix booking add-store"> <a href="#" className="clearfix">
-                          <div className="f-left" id='add_store'><img src="https://remodigital.sharepoint.com/:f:/r/sites/Remo/RemoSolutions/VTM/SiteAssets/Visitor%20and%20Trainee%20Assets/images/store.svg" className="store-img" />Training Invitee</div>
+                          <div className="f-left" id='add_store'><img src="https://remodigital.sharepoint.com/:f:/r/sites/Remo/RemoSolutions/VTM/SiteAssets/Visitor%20and%20Trainee%20Assets/images/store.svg" className="store-img" />Training Nomination</div>
+                        </a></div>
+                      </li>
+                      <li className="side_navbar" id='arrow-img' onClick={() => this.trainingNominee()}>
+                        <div className="clearfix booking add-store"> <a href="#" className="clearfix">
+                          <div className="f-left" id='add_store'><img src="https://remodigital.sharepoint.com/:f:/r/sites/Remo/RemoSolutions/VTM/SiteAssets/Visitor%20and%20Trainee%20Assets/images/store.svg" className="store-img" />Training Nominees</div>
                         </a></div>
                       </li>
                     </>
@@ -329,6 +347,9 @@ export default class Visitor extends React.Component<IVisitorProps, VisitorState
                 }
                 {this.state.TrainingInvitee == true && this.state.TraineeSection == true &&
                   <TrainingInvitee siteurl={this.props.siteurl} context={this.props.context} />
+                }
+                {this.state.TrainingNominee == true && this.state.TraineeSection == true &&
+                  <TrainingNominees siteurl={this.props.siteurl} context={this.props.context} />
                 }
 
               </div>

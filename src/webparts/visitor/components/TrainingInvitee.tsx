@@ -26,6 +26,14 @@ var NewWeb: any;
 // const localizer = momentLocalizer(moment)
 
 export interface FormState {
+    TrainingNames: any[];
+    CategorySelected: boolean;
+    CurrentUserName: string;
+    CurrentUserID: number;
+    CurrentUserEmail: string;
+    SelectedTrainingName: string;
+    StartDate: string;
+    EndDate: string;
 }
 
 export default class TrainingInvitee extends React.Component<IVisitorProps, FormState, {}> {
@@ -33,40 +41,56 @@ export default class TrainingInvitee extends React.Component<IVisitorProps, Form
     public constructor(props: IVisitorProps, state: FormState) {
         super(props);
         this.state = {
+            TrainingNames: [],
+            CategorySelected: false,
+            CurrentUserName: "",
+            CurrentUserID: 0,
+            CurrentUserEmail: "",
+            SelectedTrainingName: "",
+            StartDate: "",
+            EndDate: ""
+
         }
         NewWeb = Web("" + this.props.siteurl + "")
 
     }
     public componentDidMount() {
+        this.GetCurrentUserDetails();
+        this.GetTrainingNames();
+    }
+    public async GetCurrentUserDetails() {
+        await NewWeb.currentUser.get().then((user: any) => {
+            console.log(user);
+            this.setState({
+                CurrentUserName: user.Title,
+                CurrentUserID: user.Id,
+                CurrentUserEmail: user.Email
+            })
+        }, (errorResponse: any) => {
+        }
+        );
+
+    }
+    public GetTrainingNames() {
+        NewWeb.lists.getByTitle("Training Master Transaction").items.select("*").get()
+            .then((items: any) => {
+                if (items.length != 0) {
+                    this.setState({
+                        TrainingNames: items
+                    })
+                }
+            })
     }
     public async saveFormDetails() {
         var RequestID = "Training-" + moment().format("DDMMYYYYHHmmss")
-        NewWeb.lists.getByTitle("Training Transaction").items.add({
-            Title: $("#training_name").val(),
-            TrainingType: $("#training_type").val(),
-            Venue: $("#venue").val(),
-            StartDate: $("#start_date").val(),
-            EndDate: $("#end_date").val(),
-            MaximumPerSlot: $("#per_slot").val(),
+        NewWeb.lists.getByTitle("Training User Transaction").items.add({
+            Title: $("#employee_name").val(),
+            EmployeeCode: $("#employee_code").val(),
+            EmailAddress: $("#email").val(),
+            StartDate: this.state.StartDate,
+            EndDate: this.state.EndDate,
+            TrainingName: this.state.SelectedTrainingName,
             RequestID: RequestID,
-            EmployeeCategory: $("#employee_category").val(),
-        }).then(async () => {
-            var FoldeName = $("#training_name").val()
-            NewWeb.lists.getByTitle('Training Attachments').rootFolder.folders.add(FoldeName);
-
-            var FileInput: any = $("#attachments")
-            var Files = FileInput[0].files
-            for (var i = 0; i < Files.length; i++) {
-                const data = await NewWeb.getFolderByServerRelativeUrl(
-                    this.props.context.pageContext.web.serverRelativeUrl + `/Training Attachments/${FoldeName}`
-                ).files.add(Files[i].name, Files[i], true);
-
-                const fileItem = await data.file.getItem();
-                await fileItem.update({
-                    RequestID: RequestID,
-                });
-            }
-
         }).then(() => {
             swal({
                 text: "Submitted successfully!",
@@ -76,6 +100,35 @@ export default class TrainingInvitee extends React.Component<IVisitorProps, Form
             })
         })
     }
+    public selfCategory() {
+        this.setState({
+            CategorySelected: true
+        })
+        setTimeout(() => {
+            $("#employee_name").val(this.state.CurrentUserName)
+            $("#email").val(this.state.CurrentUserEmail)
+        }, 200)
+    }
+    public otherCategory() {
+        this.setState({
+            CategorySelected: true
+        })
+        $("#employee_name").val("")
+        $("#email").val("")
+    }
+    public GetSelectedTrainingDetails() {
+        var SelectedOption = $("#training_names").val()
+        NewWeb.lists.getByTitle("Training Master Transaction").items.select("*").filter(`Title eq '${SelectedOption}'`).get()
+            .then((items: any) => {
+                if (items.length != 0) {
+                    this.setState({
+                        SelectedTrainingName: items[0].Title,
+                        StartDate: items[0].StartDate,
+                        EndDate: items[0].EndDate
+                    })
+                }
+            })
+    }
 
     public render(): React.ReactElement<IVisitorProps> {
 
@@ -84,71 +137,50 @@ export default class TrainingInvitee extends React.Component<IVisitorProps, Form
             <>
                 <div className="row">
                     <div className="col-md-3 required"><label>Training Booking for</label><span>*</span>
-                        <input type="radio" name="training" autoComplete='off' className='form-control'
+                        <input type="radio" onClick={() => this.selfCategory()} value="self" name="training" autoComplete='off' className='form-control training_booking'
                             placeholder="Training Name"
                         />
-                        <input type="radio" name="training" autoComplete='off' className='form-control'
+                        <input type="radio" onClick={() => this.otherCategory()} value="other" name="training" autoComplete='off' className='form-control training_booking'
                             placeholder="Training Name"
                         />
                     </div>
                 </div>
-
-                <div className="add-event-page" style={{ display: "none" }}>
-                    <div className="row">
-                        <div className="col-md-3 required"><label>Training Name</label><span>*</span>
-                            <input type="text" id="training_name" autoComplete='off' className='form-control'
-                                placeholder="Training Name"
-                            />
+                {this.state.CategorySelected == true &&
+                    <div className="add-event-page">
+                        <div className="row">
+                            <div className="col-md-3 required"><label>Training Name</label><span>*</span>
+                                <select id='training_names' onChange={() => this.GetSelectedTrainingDetails()}>
+                                    <option>--Select--</option>
+                                    {this.state.TrainingNames.map((item) => {
+                                        return (
+                                            <option value={item.Title}>{item.Title}</option>
+                                        )
+                                    })}
+                                </select>
+                            </div>
                         </div>
-                        <div className="col-md-3 required"><label>Training Type</label><span>*</span>
-                            <input type="text" id="training_type" autoComplete='off' className='form-control'
-                                placeholder="Training Type"
-                            />
+                        <div className="row">
+                            <div className="col-md-3 required"><label>Employee Code</label><span>*</span>
+                                <input type="text" id="employee_code" autoComplete='off' className='form-control'
+                                    placeholder="Employee Code"
+                                />
+                            </div>
+                            <div className="col-md-3 required"><label>Employee Name</label><span>*</span>
+                                <input type="text" id="employee_name" autoComplete='off' className='form-control'
+                                    placeholder="Employee Name"
+                                />
+                            </div>
+                            <div className="col-md-3 required"><label>Email Address</label><span>*</span>
+                                <input type="text" id="email" autoComplete='off' className='form-control'
+                                    placeholder="Email Address"
+                                />
+                            </div>
                         </div>
-                        <div className="col-md-3 required"><label>Venue</label><span>*</span>
-                            <input type="text" id="venue" autoComplete='off' className='form-control'
-                                placeholder="Venue"
-                            />
+                        <div className="row send-invite-btn-wrap">
+                            <div className="send_button required"><div className="w-130 td-div send-invite"><button className="btn-wrap" onClick={() => this.saveFormDetails()}>Submit</button></div></div>
                         </div>
                     </div>
-                    <div className="row">
-                        <div className="col-md-3 required"><label>Start Date</label><span>*</span>
-                            <input type="date" id="start_date" autoComplete='off' className='form-control'
-                                placeholder="Start Date"
-                            />
-                        </div>
-                        <div className="col-md-3 required"><label>End Date</label><span>*</span>
-                            <input type="date" id="end_date" autoComplete='off' className='form-control'
-                                placeholder="End Date"
-                            />
-                        </div>
-                        <div className="col-md-3 required"><label>Maximum per slot</label><span>*</span>
-                            <input type="text" id="per_slot" autoComplete='off' className='form-control'
-                                placeholder="Maximum per slot"
-                            />
-                        </div>
-                    </div>
-                    <div className="row">
-                        <div className="col-md-3 required"><label>Employee Category</label><span>*</span>
-                            <select id="employee_category" autoComplete='off' className='form-control'>
-                                <option value="">--Select--</option>
-                                <option value="Managerial">Managerial</option>
-                                <option value="Other">Other</option>
-                            </select>
-
-
-                        </div>
-                        <div className="col-md-3 required"><label>Attachments</label><span>*</span>
-                            <input type="file" id="attachments" autoComplete='off' className='form-control'
-                                multiple
-                            />
-                        </div>
-
-                    </div>
-                    <div className="row send-invite-btn-wrap">
-                        <div className="send_button required"><div className="w-130 td-div send-invite"><button className="btn-wrap" onClick={() => this.saveFormDetails()}>Submit</button></div></div>
-                    </div>
-                </div>
+                }
 
             </>
         );
