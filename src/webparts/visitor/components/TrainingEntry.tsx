@@ -30,8 +30,10 @@ import * as moment from "moment";
 // import "@fullcalendar/daygrid/main.css";
 // import * as moment from "moment";
 // import { Calendar, momentLocalizer } from 'react-big-calendar'
-import Calendar from "react-calendar";
-import "react-calendar/dist/Calendar.css";
+// import Calendar from "react-calendar";
+// import "react-calendar/dist/Calendar.css";
+import { Calendar, momentLocalizer } from 'react-big-calendar';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 SPComponentLoader.loadCss(`https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css`);
 SPComponentLoader.loadCss(`https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css`);
@@ -39,7 +41,8 @@ SPComponentLoader.loadCss('https://remodigital.sharepoint.com/:f:/r/sites/Remo/R
 SPComponentLoader.loadCss('https://remodigital.sharepoint.com/:f:/r/sites/Remo/RemoSolutions/VTM/SiteAssets/Visitor%20and%20Trainee%20Assets/css/responsivestyle.css?v=2.9');
 
 var NewWeb: any;
-// const localizer = momentLocalizer(moment)
+let eventList: any = [];
+const localizer = momentLocalizer(moment)
 
 export interface FormState {
 }
@@ -54,6 +57,15 @@ export default class TrainingEntry extends React.Component<IVisitorProps, FormSt
 
     }
     public componentDidMount() {
+        eventList.push(
+            {
+                id: "1",
+                title: "Test",
+                start: "03/08/2024 10:15",
+                end: "03/08/2024 12:15"
+
+            }
+        )
     }
     public async saveFormDetails() {
         var StartDate = $("#start_date").val()
@@ -105,39 +117,21 @@ export default class TrainingEntry extends React.Component<IVisitorProps, FormSt
         return (
             <>
                 <div>
-                    {/* <FullCalendar
-                        schedulerLicenseKey="GPL-My-Project-Is-Open-Source"
-                        ref={this.calendarComponentRef}
-                        defaultView="dayGridMonth"
-                        dateClick={this.handleDateClick}
-                        displayEventTime={true}
-                        header={{
-                            left: "prev,next today",
-                            center: "title",
-                            right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek"
-                        }}
-                        selectable={true}
-                        plugins={[
-                            dayGridPlugin,
-                            interactionPlugin,
-                            timeGridPlugin,
-                            resourceTimeGridPlugin
-                        ]}
-                        eventClick={event => {
-                            console.log(event.event._def.publicId);
-                        }}
-                        //   events={this.state.events}
-                        select={this.handleSelectedDates}
-                        eventLimit={3}
-                    /> */}
-                    {/* <Calendar
+
+                    {/* <Calendar /> */}
+                    <Calendar
                         localizer={localizer}
-                        // events={myEventsList}
+                        events={eventList}
                         startAccessor="start"
                         endAccessor="end"
-                        style={{ height: 500 }}
-                    /> */}
-                    <Calendar />
+                        // views=""
+                        // date={handler.state.SelectedDate}
+                        // eventPropGetter={handler.eventPropGetter}
+                        style={{ height: 405 }}
+                        // onNavigate={this.handleNavigate}
+                        tooltipAccessor="catagory"
+
+                    />
 
                 </div>
                 <div className="add-event-page" style={{ display: "none" }}>
