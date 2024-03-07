@@ -194,7 +194,6 @@ export default class TrainingEntry extends React.Component<IVisitorProps, FormSt
     }
     public async handleEventClick(event: any, e: React.SyntheticEvent): Promise<void> {
         e.preventDefault();
-
         const clickedDateEvents = this.state.UpcomingEvents.filter((ev) => {
             return (
                 ev.start.getDate() === event.start.getDate() &&
@@ -207,9 +206,25 @@ export default class TrainingEntry extends React.Component<IVisitorProps, FormSt
             const items = await NewWeb.lists.getByTitle("Training Master Transaction")
                 .items.select("*").filter(`ID eq ${item.id}`).get();
             // return items[0];
-            const files = await this.getFilesForRequestId(items[0].RequestID);
-            console.log("Req", files)
-            return { ...items[0], files };
+            // const files = await this.getFilesForRequestId(items[0].RequestID);
+            const Files = await NewWeb.lists.getByTitle('Training Attachments')
+                .items
+                .select('*')
+                .filter(`RequestID eq '${items[0].RequestID}'`)
+                .expand("File")
+                .get()
+                .then((files: any) => {
+                    var Files: any[] = []
+                    if (files.length != 0) {
+                        files.map((file: any) => {
+                            Files.push({ name: file.File.Name, URL: file.File.ServerRelativeUrl })
+                        });
+
+                    }
+                    return Files
+                })
+            console.log("Req", Files)
+            return { ...items[0], Files };
         });
 
 
@@ -467,8 +482,13 @@ export default class TrainingEntry extends React.Component<IVisitorProps, FormSt
                                             <td>{item.EndDate}</td>
                                             <td>{item.EmployeeCategory}</td>
                                             <td>
-                                                {item.files && item.files.join(', ')}
+                                                {item.Files.length !== 0 ? (
+                                                    item.Files.map((item: any) => (
+                                                        <a href={item.URL} target={'_blank'}>{item.name}</a>
+                                                    ))
+                                                ) : "-"}
                                             </td>
+
                                             <td>
                                                 <img onClick={() => this.editItem(item.ID)} src={`${this.props.siteurl}/SiteAssets/Visitor%20and%20Trainee%20Assets/images/edit.svg`} />
                                                 <img onClick={() => this.deleteItem(item.ID)} src={`${this.props.siteurl}/SiteAssets/Visitor%20and%20Trainee%20Assets/images/close-icon.svg`} />
