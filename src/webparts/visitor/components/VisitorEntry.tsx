@@ -30,6 +30,7 @@ export interface FormState {
     UserAlreadyExists: boolean;
     AttachmentCopies: any[];
     PhotoName: string;
+    ExistingVisitorID: number;
 }
 
 export default class VisitorEntry extends React.Component<IVisitorProps, FormState, {}> {
@@ -41,7 +42,8 @@ export default class VisitorEntry extends React.Component<IVisitorProps, FormSta
             capturedPhoto: "",
             UserAlreadyExists: false,
             AttachmentCopies: [],
-            PhotoName: ""
+            PhotoName: "",
+            ExistingVisitorID: 0
         }
         NewWeb = Web("" + this.props.siteurl + "")
         this.handleSnapClick = this.handleSnapClick.bind(this);
@@ -85,6 +87,13 @@ export default class VisitorEntry extends React.Component<IVisitorProps, FormSta
                         NewWeb.lists.getByTitle("Visitor Master Transaction").items.getById(ID).attachmentFiles.add(Filename, photoBlob)
                     }
                 })
+            } else {
+                NewWeb.lists.getByTitle("Visitor Master Transaction").items.getById(this.state.ExistingVisitorID).update({
+                    Title: $("#name").val(),
+                    MobileNumber: $("#mobile_number").val(),
+                    EmiratesID: $("#emirates_id").val(),
+                    CompanyName: $("#company_name").val(),
+                })
             }
 
         }).then(() => {
@@ -113,7 +122,8 @@ export default class VisitorEntry extends React.Component<IVisitorProps, FormSta
                         this.setState({
                             UserAlreadyExists: true,
                             PhotoName: items[0].AttachmentFiles[0].FileName,
-                            capturedPhoto: items[0].AttachmentFiles[0].ServerRelativeUrl
+                            capturedPhoto: items[0].AttachmentFiles[0].ServerRelativeUrl,
+                            ExistingVisitorID: items[0].ID
                         })
                     })
 
@@ -124,7 +134,8 @@ export default class VisitorEntry extends React.Component<IVisitorProps, FormSta
                     this.setState({
                         UserAlreadyExists: false,
                         capturedPhoto: "",
-                        PhotoName: ""
+                        PhotoName: "",
+                        ExistingVisitorID: 0
                     })
                 }
             })

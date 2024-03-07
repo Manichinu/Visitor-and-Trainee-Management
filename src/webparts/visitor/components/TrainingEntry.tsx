@@ -41,31 +41,87 @@ SPComponentLoader.loadCss('https://remodigital.sharepoint.com/:f:/r/sites/Remo/R
 SPComponentLoader.loadCss('https://remodigital.sharepoint.com/:f:/r/sites/Remo/RemoSolutions/VTM/SiteAssets/Visitor%20and%20Trainee%20Assets/css/responsivestyle.css?v=2.9');
 
 var NewWeb: any;
-let eventList: any = [];
+// let eventList: any = [];
 const localizer = momentLocalizer(moment)
 
 export interface FormState {
+    UpcomingEvents: {
+        id: string;
+        title: string;
+        start: Date;
+        end: Date;
+        category: string;
+        className?: string; // Add className for styling
+    }[];
+    SelectedDate: any;
+    SelectedEventItems: any[];
+    CurrentView: any;
+    EditScreen: boolean;
+    EditItemID: number;
 }
 
 export default class TrainingEntry extends React.Component<IVisitorProps, FormState, {}> {
-    // calendarComponentRef = React.createRef();
     public constructor(props: IVisitorProps, state: FormState) {
         super(props);
         this.state = {
+            UpcomingEvents: [],
+            SelectedDate: "",
+            SelectedEventItems: [],
+            CurrentView: "month",
+            EditScreen: false,
+            EditItemID: 0
         }
         NewWeb = Web("" + this.props.siteurl + "")
-
+        this.handleNavigate = this.handleNavigate.bind(this);
     }
     public componentDidMount() {
-        eventList.push(
-            {
-                id: "1",
-                title: "Test",
-                start: "03/08/2024 10:15",
-                end: "03/08/2024 12:15"
+        // eventList.push(
+        //     {
+        //         id: "1",
+        //         title: "Test",
+        //         start: "03/08/2024 10:15",
+        //         end: "03/08/2024 12:15"
 
-            }
-        )
+        //     }
+        // )
+        this.GetEvents()
+    }
+    // public GetEvents() {
+    //     NewWeb.lists.getByTitle("Training Master Transaction").items.select("*").get()
+    //         .then((items: any) => {
+    //             if (items.length != 0) {
+    //                 for (var i = 0; i < items.length; i++) {
+    //                     eventList.push({
+    //                         id: items[i].ID,
+    //                         title: items[i].Title,
+    //                         start: "" + moment(items[i].StartDate, "DD-MM-YYYY hh:mm A").format("MM/DD/YYYY HH:mm") + "",
+    //                         end: "" + moment(items[i].EndDate, "DD-MM-YYYY hh:mm A").format("MM/DD/YYYY HH:mm") + "",
+    //                         category: items[i].EmployeeCategory
+    //                     })
+    //                 }
+    //                 this.setState({
+    //                     UpcomingEvents: eventList
+    //                 })
+    //             }
+    //         })
+    // }
+    public GetEvents() {
+        NewWeb.lists.getByTitle("Training Master Transaction").items.select("*").get()
+            .then((items: any) => {
+                if (items.length !== 0) {
+                    const formattedEvents = items.map((item: any) => ({
+                        id: item.ID,
+                        title: item.Title,
+                        start: moment(item.StartDate, "DD-MM-YYYY hh:mm A").toDate(),
+                        end: moment(item.EndDate, "DD-MM-YYYY hh:mm A").toDate(),
+                        category: item.EmployeeCategory,
+                    }));
+
+                    this.setState({
+                        UpcomingEvents: formattedEvents
+                    });
+                }
+            });
     }
     public async saveFormDetails() {
         var StartDate = $("#start_date").val()
@@ -110,10 +166,120 @@ export default class TrainingEntry extends React.Component<IVisitorProps, FormSt
             })
         })
     }
+    public getEventStyle(event: any) {
+        if (event.category == "Managerial") {
+            return {
+                className: 'eventscalender_green', // Add a class for styling
+            };
+        }
+        else if (event.category == "Other") {
+            return {
+                className: 'eventscalender_yellow', // Add a class for styling
+            };
+        }
+        return {};
+    };
+    public handleNavigate(newDate: any) {
+        var handler = this;
+        $("#table-example").hide();
+        $("#form").show();
+        handler.setState({
+            CurrentView: "month"
+        })
+    }
+    public async handleEventClick(event: any, e: React.SyntheticEvent): Promise<void> {
+        e.preventDefault();
+
+        const clickedDateEvents = this.state.UpcomingEvents.filter((ev) => {
+            return (
+                ev.start.getDate() === event.start.getDate() &&
+                ev.start.getMonth() === event.start.getMonth() &&
+                ev.start.getFullYear() === event.start.getFullYear()
+            );
+        });
+
+        const promises = clickedDateEvents.map(async (item) => {
+            const items = await NewWeb.lists.getByTitle("Training Master Transaction")
+                .items.select("*").filter(`ID eq ${item.id}`).get();
+            return items[0];
+        });
+
+        const selectedEventItems = await Promise.all(promises);
+
+        // Now you can display or handle the selectedEventItems as needed
+        console.log('Events for clicked date:', selectedEventItems);
+
+        this.setState({
+            SelectedEventItems: selectedEventItems
+        });
+
+        $("#table-example").show();
+        $("#form").hide();
+    }
+    public deleteItem(id: number) {
+        swal({
+            title: "Are you sure?",
+            text: "You want to delete this item!",
+            icon: "warning",
+            buttons: ["No", "Yes"],
+            dangerMode: true,
+        }).then((willDelete) => {
+            if (willDelete) {
+                NewWeb.lists.getByTitle("Training Master Transaction").items.getById(id).delete().then(() => {
+                    swal({
+                        text: "Deleted successfully!!",
+                        icon: "success",
+                    }).then(() => {
+                        location.reload();
+                    })
+                })
+            }
+        })
+    }
+    public editItem(id: number) {
+        this.setState({
+            EditScreen: true,
+            EditItemID: id
+        })
+        $("#table-example").hide();
+        $("#form").show();
+        NewWeb.lists.getByTitle("Training Master Transaction").items.select("*").filter(`ID eq ${id}`).get().then((items: any) => {
+            if (items.length != 0) {
+                $("#training_name").val(items[0].Title)
+                $("#training_type").val(items[0].TrainingType)
+                $("#venue").val(items[0].Venue)
+                $("#start_date").val(moment(items[0].StartDate, "DD-MM-YYYY hh:mm A").format("YYYY-MM-DDTHH:mm"))
+                $("#end_date").val(moment(items[0].EndDate, "DD-MM-YYYY hh:mm A").format("YYYY-MM-DDTHH:mm"))
+                $("#per_slot").val(items[0].MaximumPerSlot)
+                $("#employee_category").val(items[0].EmployeeCategory)
+
+            }
+        })
+    }
+    public UpdateItem() {
+        var StartDate = $("#start_date").val()
+        var FormatStartDate = moment(StartDate).format('DD-MM-YYYY hh:mm A')
+        var EndDate = $("#end_date").val()
+        var FormatEndDate = moment(EndDate).format('DD-MM-YYYY hh:mm A')
+        NewWeb.lists.getByTitle("Training Master Transaction").items.getById(this.state.EditItemID).update({
+            Title: $("#training_name").val(),
+            TrainingType: $("#training_type").val(),
+            Venue: $("#venue").val(),
+            StartDate: FormatStartDate,
+            EndDate: FormatEndDate,
+            MaximumPerSlot: $("#per_slot").val(),
+            EmployeeCategory: $("#employee_category").val(),
+        }).then(() => {
+            swal({
+                text: "Updated successfully!",
+                icon: "success",
+            }).then(() => {
+                location.reload();
+            })
+        })
+    }
 
     public render(): React.ReactElement<IVisitorProps> {
-
-
         return (
             <>
                 <div>
@@ -121,20 +287,22 @@ export default class TrainingEntry extends React.Component<IVisitorProps, FormSt
                     {/* <Calendar /> */}
                     <Calendar
                         localizer={localizer}
-                        events={eventList}
+                        events={this.state.UpcomingEvents}
                         startAccessor="start"
                         endAccessor="end"
                         // views=""
-                        // date={handler.state.SelectedDate}
-                        // eventPropGetter={handler.eventPropGetter}
+                        view={this.state.CurrentView}
+                        onView={(view) => this.setState({ CurrentView: view })}
+                        date=""
+                        eventPropGetter={this.getEventStyle}
                         style={{ height: 405 }}
-                        // onNavigate={this.handleNavigate}
-                        tooltipAccessor="catagory"
-
+                        onNavigate={this.handleNavigate}
+                        tooltipAccessor="category"
+                        onSelectEvent={(event, e) => this.handleEventClick(event, e)}
                     />
 
                 </div>
-                <div className="add-event-page" style={{ display: "none" }}>
+                <div className="add-event-page" id='form' style={{ display: "none" }}>
                     <div className="row">
                         <div className="col-md-3 required"><label>Training Name</label><span>*</span>
                             <input type="text" id="training_name" autoComplete='off' className='form-control'
@@ -187,7 +355,52 @@ export default class TrainingEntry extends React.Component<IVisitorProps, FormSt
 
                     </div>
                     <div className="row send-invite-btn-wrap">
-                        <div className="send_button required"><div className="w-130 td-div send-invite"><button className="btn-wrap" onClick={() => this.saveFormDetails()}>Submit</button></div></div>
+                        <div className="send_button required"><div className="w-130 td-div send-invite">
+                            {this.state.EditScreen == false ?
+                                <button className="btn-wrap" onClick={() => this.saveFormDetails()}>Submit</button>
+                                : <button className="btn-wrap" onClick={() => this.UpdateItem()}>Update</button>
+                            } </div></div>
+                    </div>
+                </div>
+                <div className="manual-booking-table view-event-table">
+                    <div className="table-responsive" id="table-content">
+                        <table className="table" id="table-example" style={{ display: "none" }}>
+                            <thead>
+                                <tr>
+                                    <th>S.No</th>
+                                    <th>Name</th>
+                                    <th>Venue</th>
+                                    <th>Training Type</th>
+                                    <th>Start Date</th>
+                                    <th>End Date</th>
+                                    <th>Employee Category</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {this.state.SelectedEventItems && this.state.SelectedEventItems.map((item, key) => {
+                                    return (
+                                        <tr>
+                                            <td>{key + 1}</td>
+                                            <td>{item.Title}</td>
+                                            <td>{item.Venue}</td>
+                                            <td>{item.TrainingType}</td>
+                                            <td>{item.StartDate}</td>
+                                            <td>{item.EndDate}</td>
+                                            <td>{item.EmployeeCategory}</td>
+                                            <td>
+                                                <img onClick={() => this.editItem(item.ID)} src={`${this.props.siteurl}/SiteAssets/Visitor%20and%20Trainee%20Assets/images/edit.svg`} />
+                                                <img onClick={() => this.deleteItem(item.ID)} src={`${this.props.siteurl}/SiteAssets/Visitor%20and%20Trainee%20Assets/images/close-icon.svg`} />
+                                            </td>
+
+                                        </tr>
+                                    )
+                                })}
+
+                            </tbody>
+
+                        </table>
+
                     </div>
                 </div>
 
