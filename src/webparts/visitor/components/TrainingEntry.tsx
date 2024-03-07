@@ -206,8 +206,12 @@ export default class TrainingEntry extends React.Component<IVisitorProps, FormSt
         const promises = clickedDateEvents.map(async (item) => {
             const items = await NewWeb.lists.getByTitle("Training Master Transaction")
                 .items.select("*").filter(`ID eq ${item.id}`).get();
-            return items[0];
+            // return items[0];
+            const files = await this.getFilesForRequestId(items[0].RequestID);
+            console.log("Req", files)
+            return { ...items[0], files };
         });
+
 
         const selectedEventItems = await Promise.all(promises);
 
@@ -220,6 +224,28 @@ export default class TrainingEntry extends React.Component<IVisitorProps, FormSt
 
         $("#table-example").show();
         $("#form").hide();
+    }
+    public async getFilesForRequestId(requestId: string) {
+        try {
+            await NewWeb.lists.getByTitle('Training Attachments')
+                .items
+                .select('*')
+                .filter(`RequestID eq '${requestId}'`)
+                .expand("File")
+                .get()
+                .then((files: any) => {
+                    if (files.length != 0) {
+                        console.log(files)
+                        const fileNames = files.map((file: any) => file.File.Name);
+                        return fileNames;
+
+                    }
+                })
+
+        } catch (error) {
+            console.error('Error fetching files for RequestID:', error);
+            return [];
+        }
     }
     public deleteItem(id: number) {
         swal({
@@ -425,6 +451,7 @@ export default class TrainingEntry extends React.Component<IVisitorProps, FormSt
                                     <th>Start Date</th>
                                     <th>End Date</th>
                                     <th>Employee Category</th>
+                                    <th>Files</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -439,6 +466,9 @@ export default class TrainingEntry extends React.Component<IVisitorProps, FormSt
                                             <td>{item.StartDate}</td>
                                             <td>{item.EndDate}</td>
                                             <td>{item.EmployeeCategory}</td>
+                                            <td>
+                                                {item.files && item.files.join(', ')}
+                                            </td>
                                             <td>
                                                 <img onClick={() => this.editItem(item.ID)} src={`${this.props.siteurl}/SiteAssets/Visitor%20and%20Trainee%20Assets/images/edit.svg`} />
                                                 <img onClick={() => this.deleteItem(item.ID)} src={`${this.props.siteurl}/SiteAssets/Visitor%20and%20Trainee%20Assets/images/close-icon.svg`} />
