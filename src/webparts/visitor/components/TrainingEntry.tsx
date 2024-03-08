@@ -272,7 +272,7 @@ export default class TrainingEntry extends React.Component<IVisitorProps, FormSt
             EditScreen: true,
             EditItemID: id
         })
-        $("#table-example").hide();
+        $("#table-details").hide();
         $("#form").show();
         NewWeb.lists.getByTitle("Training Master Transaction").items.select("*").filter(`ID eq ${id}`).get().then((items: any) => {
             if (items.length != 0) {
