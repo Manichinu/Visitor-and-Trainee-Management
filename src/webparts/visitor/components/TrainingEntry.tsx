@@ -170,7 +170,7 @@ export default class TrainingEntry extends React.Component<IVisitorProps, FormSt
     };
     public handleNavigate(newDate: any) {
         var handler = this;
-        $("#table-example").hide();
+        $("#table-details").hide();
         $("#form").show();
         handler.setState({
             CurrentView: "month",
@@ -222,7 +222,7 @@ export default class TrainingEntry extends React.Component<IVisitorProps, FormSt
             SelectedEventItems: selectedEventItems
         });
 
-        $("#table-example").show();
+        $("#table-details").show();
         $("#form").hide();
     }
     public async getFilesForRequestId(requestId: string) {
@@ -346,11 +346,17 @@ export default class TrainingEntry extends React.Component<IVisitorProps, FormSt
                 }
             })
     }
+    public closeForm() {
+        $("#form").hide();
+    }
+    public closeTable() {
+        $("#table-details").hide();
+    }
 
     public render(): React.ReactElement<IVisitorProps> {
         return (
             <>
-                <div>
+                <div className='manager_calendar'>
 
                     {/* <Calendar /> */}
                     <Calendar
@@ -370,123 +376,146 @@ export default class TrainingEntry extends React.Component<IVisitorProps, FormSt
                     />
 
                 </div>
-                <div className="add-event-page training-entry" id='form' style={{ display: "none" }}>
-                    <div className="row">
-                        <div className="col-md-3 required"><label>Training Name</label><span>*</span>
-                            <input type="text" id="training_name" autoComplete='off' className='form-control'
-                                placeholder="Training Name"
-                            />
-                        </div>
-                        <div className="col-md-3 required"><label>Training Type</label><span>*</span>
-                            <input type="text" id="training_type" autoComplete='off' className='form-control'
-                                placeholder="Training Type"
-                            />
-                        </div>
-                        <div className="col-md-3 required"><label>Venue</label><span>*</span>
-                            <input type="text" id="venue" autoComplete='off' className='form-control'
-                                placeholder="Venue"
-                            />
-                        </div>
-                    </div>
-                    <div className="row">
-                        <div className="col-md-3 required"><label>Start Date</label><span>*</span>
-                            <input type="datetime-local" id="start_date" autoComplete='off' className='form-control'
-                                placeholder="Start Date"
-                            />
-                        </div>
-                        <div className="col-md-3 required"><label>End Date</label><span>*</span>
-                            <input type="datetime-local" id="end_date" autoComplete='off' className='form-control'
-                                placeholder="End Date"
-                            />
-                        </div>
-                        <div className="col-md-3 required"><label>Maximum per slot</label><span>*</span>
-                            <input type="text" id="per_slot" autoComplete='off' className='form-control'
-                                placeholder="Maximum per slot"
-                            />
-                        </div>
-                    </div>
-                    <div className="row">
-                        <div className="col-md-3 required"><label>Employee Category</label><span>*</span>
-                            <select id="employee_category" autoComplete='off' className='form-control'>
-                                <option value="">--Select--</option>
-                                <option value="Managerial">Managerial</option>
-                                <option value="Other">Other</option>
-                            </select>
+                <div className='popup' id='form' style={{ display: "none" }}>
+                    <div className='overlay_popup'>
+                        <div className="add-event-page training-entry">
+                            <h4>Create Training</h4>
+                            <div className="popup_cancel" onClick={() => this.closeForm()}>
+                                <img src={`${this.props.siteurl}/SiteAssets/Visitor%20and%20Trainee%20Assets/images/close-icon.svg`} />
+                            </div>
+                            <div className="row">
+                                <div className="col-md-4 required"><label>Training Name</label><span>*</span>
+                                    <input type="text" id="training_name" autoComplete='off' className='form-control'
+                                        placeholder="Training Name"
+                                    />
+                                </div>
+                                <div className="col-md-4 required"><label>Training Type</label><span>*</span>
+                                    <input type="text" id="training_type" autoComplete='off' className='form-control'
+                                        placeholder="Training Type"
+                                    />
+                                </div>
+                                <div className="col-md-4 required"><label>Venue</label><span>*</span>
+                                    <input type="text" id="venue" autoComplete='off' className='form-control'
+                                        placeholder="Venue"
+                                    />
+                                </div>
+                            </div>
+                            <div className="row">
+                                <div className="col-md-4 required"><label>Start Date</label><span>*</span>
+                                    <input type="datetime-local" id="start_date" autoComplete='off' className='form-control'
+                                        placeholder="Start Date"
+                                    />
+                                </div>
+                                <div className="col-md-4 required"><label>End Date</label><span>*</span>
+                                    <input type="datetime-local" id="end_date" autoComplete='off' className='form-control'
+                                        placeholder="End Date"
+                                    />
+                                </div>
+                                <div className="col-md-4 required"><label>Maximum per slot</label><span>*</span>
+                                    <input type="text" id="per_slot" autoComplete='off' className='form-control'
+                                        placeholder="Maximum per slot"
+                                    />
+                                </div>
+                            </div>
+                            <div className="row">
+                                <div className="col-md-4 required"><label>Employee Category</label><span>*</span>
+                                    <select id="employee_category" autoComplete='off' className='form-control'>
+                                        <option value="">--Select--</option>
+                                        <option value="Managerial">Managerial</option>
+                                        <option value="Other">Other</option>
+                                    </select>
 
 
-                        </div>
-                        <div className="col-md-3 required"><label>Attachments</label><span>*</span>
-                            <input type="file" id="attachments" autoComplete='off' className='form-control'
-                                multiple
-                            />
-                            <div>
-                                {this.state.EditScreen == true && (
-                                    this.state.PreviousFiles.map((item) => {
-                                        return (
-                                            <a href={item.File.ServerRelativeUrl} target='_blank'>{item.File.Name}</a>
-                                        )
-                                    })
-                                )}
+                                </div>
+                                <div className="col-md-4 required"><label>Attachments</label><span>*</span>
+                                    <div className="image-upload">
+                                        <label htmlFor="attachments" className="img-upload">
+                                            <h5><img src={`${this.props.siteurl}/SiteAssets/Visitor%20and%20Trainee%20Assets/images/upload.svg`} data-themekey="#" />
+                                                <span>Upload</span>
+                                            </h5></label>
+                                    </div>
+                                    <input type="file" id="attachments" autoComplete='off' className='form-control'
+                                        multiple
+                                    />
+
+                                    <div className="imgupload_files">
+                                        {this.state.EditScreen == true && (
+                                            this.state.PreviousFiles.map((item) => {
+                                                return (
+                                                    <a href={item.File.ServerRelativeUrl} className='uploaded-files' target='_blank'>{item.File.Name}</a>
+                                                )
+                                            })
+                                        )}
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div className="row send-invite-btn-wrap">
+                                <div className="send_button required"><div className="w-130 td-div send-invite">
+                                    {this.state.EditScreen == false ?
+                                        <button className="btn-wrap" onClick={() => this.saveFormDetails()}>Submit</button>
+                                        : <button className="btn-wrap" onClick={() => this.UpdateItem()}>Update</button>
+                                    } </div></div>
                             </div>
                         </div>
-
-                    </div>
-                    <div className="row send-invite-btn-wrap">
-                        <div className="send_button required"><div className="w-130 td-div send-invite">
-                            {this.state.EditScreen == false ?
-                                <button className="btn-wrap" onClick={() => this.saveFormDetails()}>Submit</button>
-                                : <button className="btn-wrap" onClick={() => this.UpdateItem()}>Update</button>
-                            } </div></div>
                     </div>
                 </div>
-                <div className="manual-booking-table view-event-table training-entry-table">
-                    <div className="table-responsive" id="table-content">
-                        <table className="table" id="table-example" style={{ display: "none" }}>
-                            <thead>
-                                <tr>
-                                    <th>S.No</th>
-                                    <th>Name</th>
-                                    <th>Venue</th>
-                                    <th>Training Type</th>
-                                    <th>Start Date</th>
-                                    <th>End Date</th>
-                                    <th>Employee Category</th>
-                                    <th>Files</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {this.state.SelectedEventItems && this.state.SelectedEventItems.map((item, key) => {
-                                    return (
+                <div className='table-popup' style={{ display: "none" }} id='table-details'>
+                    <div className='table-overlay_popup'>
+                        <div className="manual-booking-table view-event-table training-entry-table">
+                            <div className="table-responsive" id="table-content">
+                                <h4 className="events_title">Event Details</h4>
+                                <div className="popup_cancel" onClick={() => this.closeTable()}>
+                                    <img src={`${this.props.siteurl}/SiteAssets/Visitor%20and%20Trainee%20Assets/images/close-icon.svg`} />
+                                </div>
+                                <table className="table" id="table-example">
+                                    <thead>
                                         <tr>
-                                            <td>{key + 1}</td>
-                                            <td>{item.Title}</td>
-                                            <td>{item.Venue}</td>
-                                            <td>{item.TrainingType}</td>
-                                            <td>{item.StartDate}</td>
-                                            <td>{item.EndDate}</td>
-                                            <td>{item.EmployeeCategory}</td>
-                                            <td>
-                                                {item.Files.length !== 0 ? (
-                                                    item.Files.map((item: any) => (
-                                                        <a href={item.URL} target={'_blank'}>{item.name}</a>
-                                                    ))
-                                                ) : "-"}
-                                            </td>
-
-                                            <td>
-                                                <img onClick={() => this.editItem(item.ID)} src={`${this.props.siteurl}/SiteAssets/Visitor%20and%20Trainee%20Assets/images/edit.svg`} />
-                                                <img onClick={() => this.deleteItem(item.ID)} src={`${this.props.siteurl}/SiteAssets/Visitor%20and%20Trainee%20Assets/images/close-icon.svg`} />
-                                            </td>
-
+                                            <th>S.No</th>
+                                            <th>Name</th>
+                                            <th>Venue</th>
+                                            <th>Training Type</th>
+                                            <th>Start Date</th>
+                                            <th>End Date</th>
+                                            <th>Employee Category</th>
+                                            <th>Files</th>
+                                            <th>Action</th>
                                         </tr>
-                                    )
-                                })}
+                                    </thead>
+                                    <tbody>
+                                        {this.state.SelectedEventItems && this.state.SelectedEventItems.map((item, key) => {
+                                            return (
+                                                <tr>
+                                                    <td>{key + 1}</td>
+                                                    <td>{item.Title}</td>
+                                                    <td>{item.Venue}</td>
+                                                    <td>{item.TrainingType}</td>
+                                                    <td>{item.StartDate}</td>
+                                                    <td>{item.EndDate}</td>
+                                                    <td>{item.EmployeeCategory}</td>
+                                                    <td className='files-section'>
+                                                        {item.Files.length !== 0 ? (
+                                                            item.Files.map((item: any) => (
+                                                                <a href={item.URL} target={'_blank'}>{item.name}</a>
+                                                            ))
+                                                        ) : "-"}
+                                                    </td>
 
-                            </tbody>
+                                                    <td className='edit_section'>
+                                                        <img onClick={() => this.editItem(item.ID)} src={`${this.props.siteurl}/SiteAssets/Visitor%20and%20Trainee%20Assets/images/edit.svg`} />
+                                                        <img onClick={() => this.deleteItem(item.ID)} src={`${this.props.siteurl}/SiteAssets/Visitor%20and%20Trainee%20Assets/images/close-icon.svg`} />
+                                                    </td>
 
-                        </table>
+                                                </tr>
+                                            )
+                                        })}
 
+                                    </tbody>
+
+                                </table>
+
+                            </div>
+                        </div>
                     </div>
                 </div>
 

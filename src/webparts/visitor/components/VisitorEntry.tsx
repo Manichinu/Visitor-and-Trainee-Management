@@ -254,7 +254,8 @@ export default class VisitorEntry extends React.Component<IVisitorProps, FormSta
                                             style={{ width: "100px", height: "100px" }}
                                         />
                                     ) : (
-                                        <button onClick={() => this.setState({ isWebcamActive: true })}>
+                                        <button className='photo_gallery' onClick={() => this.setState({ isWebcamActive: true })}>
+                                            <img className='photo_img' src={`${this.props.siteurl}/SiteAssets/Visitor%20and%20Trainee%20Assets/images/photocamera.svg`} />
                                             Take Photo
                                         </button>
                                     )}
@@ -267,7 +268,8 @@ export default class VisitorEntry extends React.Component<IVisitorProps, FormSta
                                 } */}
 
                             {isWebcamActive && (
-                                <button onClick={this.handleSnapClick}>Click Snap</button>
+                                <button className='photo_gallery' onClick={this.handleSnapClick}>                                            <img className='photo_img' src={`${this.props.siteurl}/SiteAssets/Visitor%20and%20Trainee%20Assets/images/photocamera.svg`} />
+                                    Click Snap</button>
                             )}
                         </div>
 

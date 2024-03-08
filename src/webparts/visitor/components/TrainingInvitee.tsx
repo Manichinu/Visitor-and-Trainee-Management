@@ -160,9 +160,10 @@ export default class TrainingInvitee extends React.Component<IVisitorProps, Form
                     </div>
                     {this.state.CategorySelected == true &&
                         <>
+
                             <div className="row">
                                 <div className="col-md-3 required"><label>Training Name</label><span>*</span>
-                                    <select id='training_names' onChange={() => this.GetSelectedTrainingDetails()}>
+                                    <select className='form-control' id='training_names' onChange={() => this.GetSelectedTrainingDetails()}>
                                         <option>--Select--</option>
                                         {this.state.TrainingNames.map((item) => {
                                             return (
@@ -171,8 +172,6 @@ export default class TrainingInvitee extends React.Component<IVisitorProps, Form
                                         })}
                                     </select>
                                 </div>
-                            </div>
-                            <div className="row">
                                 <div className="col-md-3 required"><label>Employee Code</label><span>*</span>
                                     <input type="text" id="employee_code" autoComplete='off' className='form-control'
                                         placeholder="Employee Code"

@@ -115,7 +115,7 @@ export default class UserCalendar extends React.Component<IUserCalendarProps, Fo
       SelectedEventItems: selectedEventItems
     });
 
-    $("#table-example").show();
+    $("#table-details").show();
   }
   public GetEvents() {
     NewWeb.lists.getByTitle("Training Master Transaction").items.select("*").get()
@@ -140,7 +140,10 @@ export default class UserCalendar extends React.Component<IUserCalendarProps, Fo
     handler.setState({
       CurrentView: "month",
     })
-    $("#table-example").hide()
+    $("#table-details").hide()
+  }
+  public closeTable() {
+    $("#table-details").hide();
   }
   public render(): React.ReactElement<IUserCalendarProps> {
     // const {
@@ -212,7 +215,7 @@ export default class UserCalendar extends React.Component<IUserCalendarProps, Fo
             </div>
           </header>
           <div className="store-section user-calendar">
-            <div className="row store-wrap">
+            <div className="row store-wrap user_calendar">
               <Calendar
                 localizer={localizer}
                 events={this.state.UpcomingEvents}
@@ -230,49 +233,57 @@ export default class UserCalendar extends React.Component<IUserCalendarProps, Fo
               />
             </div>
           </div>
-          <div className="manual-booking-table view-event-table user-calendar">
-            <div className="table-responsive" id="table-content">
-              <table className="table" id="table-example" style={{ display: "none" }}>
-                <thead>
-                  <tr>
-                    <th>S.No</th>
-                    <th>Name</th>
-                    <th>Venue</th>
-                    <th>Training Type</th>
-                    <th>Start Date</th>
-                    <th>End Date</th>
-                    <th>Employee Category</th>
-                    <th>Files</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {this.state.SelectedEventItems && this.state.SelectedEventItems.map((item, key) => {
-                    return (
+          <div className='table-popup' style={{ display: "none" }} id='table-details'>
+            <div className='table-overlay_popup'>
+              <div className="manual-booking-table view-event-table user-calendar">
+                <div className="table-responsive" id="table-content">
+                  <h4 className="events_title">Event Details</h4>
+                  <div className="popup_cancel" onClick={() => this.closeTable()}>
+                    <img src={`${this.props.siteurl}/SiteAssets/Visitor%20and%20Trainee%20Assets/images/close-icon.svg`} />
+                  </div>
+                  <table className="table" id="table-example">
+                    <thead>
                       <tr>
-                        <td>{key + 1}</td>
-                        <td>{item.Title}</td>
-                        <td>{item.Venue}</td>
-                        <td>{item.TrainingType}</td>
-                        <td>{item.StartDate}</td>
-                        <td>{item.EndDate}</td>
-                        <td>{item.EmployeeCategory}</td>
-                        <td>
-                          {item.Files.length !== 0 ? (
-                            item.Files.map((item: any) => (
-                              <a href={item.URL} target={'_blank'}>{item.name}</a>
-                            ))
-                          ) : "-"}
-                        </td>
-
-
+                        <th>S.No</th>
+                        <th>Name</th>
+                        <th>Venue</th>
+                        <th>Training Type</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Employee Category</th>
+                        <th>Files</th>
                       </tr>
-                    )
-                  })}
+                    </thead>
+                    <tbody>
+                      {this.state.SelectedEventItems && this.state.SelectedEventItems.map((item, key) => {
+                        return (
+                          <tr>
+                            <td>{key + 1}</td>
+                            <td>{item.Title}</td>
+                            <td>{item.Venue}</td>
+                            <td>{item.TrainingType}</td>
+                            <td>{item.StartDate}</td>
+                            <td>{item.EndDate}</td>
+                            <td>{item.EmployeeCategory}</td>
+                            <td className='files-section'>
+                              {item.Files.length !== 0 ? (
+                                item.Files.map((item: any) => (
+                                  <a href={item.URL} target={'_blank'}>{item.name}</a>
+                                ))
+                              ) : "-"}
+                            </td>
 
-                </tbody>
 
-              </table>
+                          </tr>
+                        )
+                      })}
 
+                    </tbody>
+
+                  </table>
+
+                </div>
+              </div>
             </div>
           </div>
         </section>
