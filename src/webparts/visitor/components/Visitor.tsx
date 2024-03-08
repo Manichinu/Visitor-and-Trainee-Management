@@ -201,6 +201,8 @@ export default class Visitor extends React.Component<IVisitorProps, VisitorState
         $(".side_navbar").removeClass('active');
         $(this).addClass('active');
       })
+      $(".header_part").removeClass('active');
+      $("#Visitor").addClass('active')
     }, 200)
   }
   public TraineeSection() {
@@ -216,6 +218,8 @@ export default class Visitor extends React.Component<IVisitorProps, VisitorState
         $(".side_navbar").removeClass('active');
         $(this).addClass('active');
       })
+      $(".header_part").removeClass('active');
+      $("#Training").addClass('active')
     }, 200)
 
   }
