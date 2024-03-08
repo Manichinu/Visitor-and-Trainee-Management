@@ -9,10 +9,19 @@
           "manifest": "./src/webparts/visitor/VisitorWebPart.manifest.json"
         }
       ]
+    },
+    "user-calendar-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/userCalendar/UserCalendarWebPart.js",
+          "manifest": "./src/webparts/userCalendar/UserCalendarWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
   "localizedResources": {
-    "VisitorWebPartStrings": "lib/webparts/visitor/loc/{locale}.js"
+    "VisitorWebPartStrings": "lib/webparts/visitor/loc/{locale}.js",
+    "UserCalendarWebPartStrings": "lib/webparts/userCalendar/loc/{locale}.js"
   }
 }

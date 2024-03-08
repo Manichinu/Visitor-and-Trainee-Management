@@ -15,25 +15,10 @@ import "DataTables.net";
 import 'datatables.net-dt/css/jquery.dataTables.css';
 import swal from "sweetalert";
 import * as moment from "moment";
-
-// import * as $ from "jquery";
-// import FullCalendar from "@fullcalendar/react";
-// import dayGridPlugin from "@fullcalendar/daygrid";
-// import interactionPlugin from "@fullcalendar/interaction";
-// import timeGridPlugin from "@fullcalendar/timegrid";
-// import resourceTimeGridPlugin from "@fullcalendar/resource-timegrid";
-
-// import "@fullcalendar/core/main.css";
-// import "@fullcalendar/daygrid/main.css";
-
-// import "@fullcalendar/core/main.css";
-// import "@fullcalendar/daygrid/main.css";
-// import * as moment from "moment";
-// import { Calendar, momentLocalizer } from 'react-big-calendar'
-// import Calendar from "react-calendar";
-// import "react-calendar/dist/Calendar.css";
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
+
+
 
 SPComponentLoader.loadCss(`https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css`);
 SPComponentLoader.loadCss(`https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css`);
