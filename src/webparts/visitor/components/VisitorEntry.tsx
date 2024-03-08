@@ -200,7 +200,7 @@ export default class VisitorEntry extends React.Component<IVisitorProps, FormSta
         const { isWebcamActive } = this.state;
         return (
             <>
-                <div className="add-event-page">
+                <div className="add-event-page visitor-entry">
                     <div className="row">
                         <div className="col-md-3 required"><label htmlFor="fname">Mobile Number</label><span>*</span>
                             <input type="text" onChange={() => this.GetVisitorDetails()} id="mobile_number" autoComplete='off' className='form-control'

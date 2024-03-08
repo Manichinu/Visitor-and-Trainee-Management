@@ -370,7 +370,7 @@ export default class TrainingEntry extends React.Component<IVisitorProps, FormSt
                     />
 
                 </div>
-                <div className="add-event-page" id='form' style={{ display: "none" }}>
+                <div className="add-event-page training-entry" id='form' style={{ display: "none" }}>
                     <div className="row">
                         <div className="col-md-3 required"><label>Training Name</label><span>*</span>
                             <input type="text" id="training_name" autoComplete='off' className='form-control'
@@ -439,7 +439,7 @@ export default class TrainingEntry extends React.Component<IVisitorProps, FormSt
                             } </div></div>
                     </div>
                 </div>
-                <div className="manual-booking-table view-event-table">
+                <div className="manual-booking-table view-event-table training-entry-table">
                     <div className="table-responsive" id="table-content">
                         <table className="table" id="table-example" style={{ display: "none" }}>
                             <thead>

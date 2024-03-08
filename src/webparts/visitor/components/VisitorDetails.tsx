@@ -108,7 +108,7 @@ export default class VisitorDetails extends React.Component<IVisitorProps, FormS
 
         return (
             <>
-                <div className="manual-booking-table view-event-table" style={{ display: "block" }}>
+                <div className="manual-booking-table visitor-details view-event-table" style={{ display: "block" }}>
                     <div className="table-responsive" id="table-content">
                         <table className="table" id="table-example">
                             <thead>

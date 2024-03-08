@@ -211,7 +211,7 @@ export default class UserCalendar extends React.Component<IUserCalendarProps, Fo
               </div>
             </div>
           </header>
-          <div className="store-section">
+          <div className="store-section user-calendar">
             <div className="row store-wrap">
               <Calendar
                 localizer={localizer}

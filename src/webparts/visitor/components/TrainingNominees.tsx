@@ -124,7 +124,7 @@ export default class TrainingNominees extends React.Component<IVisitorProps, For
 
         return (
             <>
-                <div className="manual-booking-table view-event-table" style={{ display: "block" }}>
+                <div className="manual-booking-table tarining-nominees view-event-table" style={{ display: "block" }}>
                     <div className="table-responsive" id="table-content">
                         <table className="table" id="table-example">
                             <thead>

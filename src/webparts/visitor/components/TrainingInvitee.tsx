@@ -15,9 +15,8 @@ import "DataTables.net";
 import 'datatables.net-dt/css/jquery.dataTables.css';
 import swal from "sweetalert";
 import * as moment from "moment";
-// import { graphfi } from "@pnp/graph";
-// import '@pnp/graph/calendars';
-// import '@pnp/graph/users';
+
+
 
 SPComponentLoader.loadCss(`https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css`);
 SPComponentLoader.loadCss(`https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css`);
@@ -36,6 +35,7 @@ export interface FormState {
     SelectedTrainingName: string;
     StartDate: string;
     EndDate: string;
+    EmployeeCategory: string;
 }
 
 export default class TrainingInvitee extends React.Component<IVisitorProps, FormState, {}> {
@@ -50,7 +50,8 @@ export default class TrainingInvitee extends React.Component<IVisitorProps, Form
             CurrentUserEmail: "",
             SelectedTrainingName: "",
             StartDate: "",
-            EndDate: ""
+            EndDate: "",
+            EmployeeCategory: ""
 
         }
         NewWeb = Web("" + this.props.siteurl + "")
@@ -59,35 +60,6 @@ export default class TrainingInvitee extends React.Component<IVisitorProps, Form
     public async componentDidMount() {
         this.GetCurrentUserDetails();
         this.GetTrainingNames();
-
-        // // Target user's email address
-        // const targetUserEmail = 'manirkdm2000@gmail.com.com';
-        // const graph = graphfi()
-        // // Create an event on the target user's calendar
-        // try {
-        //     const response = await graph.users.getById(targetUserEmail).calendar.events.add({
-        //         subject: 'Meeting with Client',
-        //         body: {
-        //             contentType: 'html',
-        //             content: 'Discuss upcoming project',
-        //         },
-        //         start: {
-        //             dateTime: '2024-03-08T14:00:00',
-        //             timeZone: 'UTC',
-        //         },
-        //         end: {
-        //             dateTime: '2024-03-08T15:00:00',
-        //             timeZone: 'UTC',
-        //         },
-        //         location: {
-        //             displayName: 'Office',
-        //         },
-        //     });
-
-        //     console.log('Event created successfully:', response);
-        // } catch (error) {
-        //     console.error('Error creating event:', error);
-        // }
     }
     public async GetCurrentUserDetails() {
         await NewWeb.currentUser.get().then((user: any) => {
@@ -122,6 +94,7 @@ export default class TrainingInvitee extends React.Component<IVisitorProps, Form
             EndDate: this.state.EndDate,
             TrainingName: this.state.SelectedTrainingName,
             RequestID: RequestID,
+            Category: this.state.EmployeeCategory
         }).then(() => {
             swal({
                 text: "Submitted successfully!",
@@ -155,7 +128,8 @@ export default class TrainingInvitee extends React.Component<IVisitorProps, Form
                     this.setState({
                         SelectedTrainingName: items[0].Title,
                         StartDate: items[0].StartDate,
-                        EndDate: items[0].EndDate
+                        EndDate: items[0].EndDate,
+                        EmployeeCategory: items[0].EmployeeCategory
                     })
                 }
             })
@@ -166,52 +140,62 @@ export default class TrainingInvitee extends React.Component<IVisitorProps, Form
 
         return (
             <>
-                <div className="row">
-                    <div className="col-md-3 required"><label>Training Booking for</label><span>*</span>
-                        <input type="radio" onClick={() => this.selfCategory()} value="self" name="training" autoComplete='off' className='form-control training_booking'
-                            placeholder="Training Name"
-                        />
-                        <input type="radio" onClick={() => this.otherCategory()} value="other" name="training" autoComplete='off' className='form-control training_booking'
-                            placeholder="Training Name"
-                        />
+
+                <div className="add-event-page training_invitee">
+                    <div className="row">
+                        <div className="col-md-3 required"><label>Training Booking for</label><span>*</span>
+                            <div className='self-section' onClick={() => this.selfCategory()}>
+                                <input type="radio" id='selfradio' value="self" name="training" autoComplete='off' className='training_booking'
+                                    placeholder="Training Name"
+                                />
+                                <label htmlFor='selfradio'>Self</label>
+                            </div>
+                            <div className='Other-section' onClick={() => this.otherCategory()}>
+                                <input type="radio" value="other" id='otherradio' name="training" autoComplete='off' className='training_booking'
+                                    placeholder="Training Name"
+                                />
+                                <label htmlFor='otherradio'>Other</label>
+                            </div>
+                        </div>
                     </div>
+                    {this.state.CategorySelected == true &&
+                        <>
+                            <div className="row">
+                                <div className="col-md-3 required"><label>Training Name</label><span>*</span>
+                                    <select id='training_names' onChange={() => this.GetSelectedTrainingDetails()}>
+                                        <option>--Select--</option>
+                                        {this.state.TrainingNames.map((item) => {
+                                            return (
+                                                <option value={item.Title}>{item.Title}</option>
+                                            )
+                                        })}
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="row">
+                                <div className="col-md-3 required"><label>Employee Code</label><span>*</span>
+                                    <input type="text" id="employee_code" autoComplete='off' className='form-control'
+                                        placeholder="Employee Code"
+                                    />
+                                </div>
+                                <div className="col-md-3 required"><label>Employee Name</label><span>*</span>
+                                    <input type="text" id="employee_name" autoComplete='off' className='form-control'
+                                        placeholder="Employee Name"
+                                    />
+                                </div>
+                                <div className="col-md-3 required"><label>Email Address</label><span>*</span>
+                                    <input type="text" id="email" autoComplete='off' className='form-control'
+                                        placeholder="Email Address"
+                                    />
+                                </div>
+                            </div>
+                            <div className="row send-invite-btn-wrap">
+                                <div className="send_button required"><div className="w-130 td-div send-invite"><button className="btn-wrap" onClick={() => this.saveFormDetails()}>Submit</button></div></div>
+                            </div>
+                        </>
+                    }
+
                 </div>
-                {this.state.CategorySelected == true &&
-                    <div className="add-event-page">
-                        <div className="row">
-                            <div className="col-md-3 required"><label>Training Name</label><span>*</span>
-                                <select id='training_names' onChange={() => this.GetSelectedTrainingDetails()}>
-                                    <option>--Select--</option>
-                                    {this.state.TrainingNames.map((item) => {
-                                        return (
-                                            <option value={item.Title}>{item.Title}</option>
-                                        )
-                                    })}
-                                </select>
-                            </div>
-                        </div>
-                        <div className="row">
-                            <div className="col-md-3 required"><label>Employee Code</label><span>*</span>
-                                <input type="text" id="employee_code" autoComplete='off' className='form-control'
-                                    placeholder="Employee Code"
-                                />
-                            </div>
-                            <div className="col-md-3 required"><label>Employee Name</label><span>*</span>
-                                <input type="text" id="employee_name" autoComplete='off' className='form-control'
-                                    placeholder="Employee Name"
-                                />
-                            </div>
-                            <div className="col-md-3 required"><label>Email Address</label><span>*</span>
-                                <input type="text" id="email" autoComplete='off' className='form-control'
-                                    placeholder="Email Address"
-                                />
-                            </div>
-                        </div>
-                        <div className="row send-invite-btn-wrap">
-                            <div className="send_button required"><div className="w-130 td-div send-invite"><button className="btn-wrap" onClick={() => this.saveFormDetails()}>Submit</button></div></div>
-                        </div>
-                    </div>
-                }
 
             </>
         );
