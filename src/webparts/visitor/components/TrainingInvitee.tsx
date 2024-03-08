@@ -15,7 +15,9 @@ import "DataTables.net";
 import 'datatables.net-dt/css/jquery.dataTables.css';
 import swal from "sweetalert";
 import * as moment from "moment";
-
+// import { graphfi } from "@pnp/graph";
+// import '@pnp/graph/calendars';
+// import '@pnp/graph/users';
 
 SPComponentLoader.loadCss(`https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css`);
 SPComponentLoader.loadCss(`https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css`);
@@ -54,9 +56,38 @@ export default class TrainingInvitee extends React.Component<IVisitorProps, Form
         NewWeb = Web("" + this.props.siteurl + "")
 
     }
-    public componentDidMount() {
+    public async componentDidMount() {
         this.GetCurrentUserDetails();
         this.GetTrainingNames();
+
+        // // Target user's email address
+        // const targetUserEmail = 'manirkdm2000@gmail.com.com';
+        // const graph = graphfi()
+        // // Create an event on the target user's calendar
+        // try {
+        //     const response = await graph.users.getById(targetUserEmail).calendar.events.add({
+        //         subject: 'Meeting with Client',
+        //         body: {
+        //             contentType: 'html',
+        //             content: 'Discuss upcoming project',
+        //         },
+        //         start: {
+        //             dateTime: '2024-03-08T14:00:00',
+        //             timeZone: 'UTC',
+        //         },
+        //         end: {
+        //             dateTime: '2024-03-08T15:00:00',
+        //             timeZone: 'UTC',
+        //         },
+        //         location: {
+        //             displayName: 'Office',
+        //         },
+        //     });
+
+        //     console.log('Event created successfully:', response);
+        // } catch (error) {
+        //     console.error('Error creating event:', error);
+        // }
     }
     public async GetCurrentUserDetails() {
         await NewWeb.currentUser.get().then((user: any) => {

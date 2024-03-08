@@ -149,6 +149,10 @@ export default class Visitor extends React.Component<IVisitorProps, VisitorState
         $(".header_part").removeClass('active');
         $(this).addClass('active');
       })
+      $(".side_navbar").on('click', function () {
+        $(".side_navbar").removeClass('active');
+        $(this).addClass('active');
+      })
     }, 200)
 
   }

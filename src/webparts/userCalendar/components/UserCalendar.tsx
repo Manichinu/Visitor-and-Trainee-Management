@@ -140,6 +140,7 @@ export default class UserCalendar extends React.Component<IUserCalendarProps, Fo
     handler.setState({
       CurrentView: "month",
     })
+    $("#table-example").hide()
   }
   public render(): React.ReactElement<IUserCalendarProps> {
     // const {
