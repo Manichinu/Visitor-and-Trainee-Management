@@ -176,6 +176,13 @@ export default class TrainingEntry extends React.Component<IVisitorProps, FormSt
             CurrentView: "month",
             EditScreen: false
         })
+        $("#training_name").val("")
+        $("#training_type").val("")
+        $("#venue").val("")
+        $("#start_date").val("")
+        $("#end_date").val("")
+        $("#per_slot").val("")
+        $("#employee_category").val("")
     }
     public async handleEventClick(event: any, e: React.SyntheticEvent): Promise<void> {
         e.preventDefault();
