@@ -510,7 +510,7 @@ export default class TrainingEntry extends React.Component<IVisitorProps, FormSt
 
                                                     <td className='edit_section'>
                                                         <img onClick={() => this.editItem(item.ID)} src={`${this.props.siteurl}/SiteAssets/Visitor%20and%20Trainee%20Assets/images/edit.svg`} />
-                                                        <img onClick={() => this.deleteItem(item.ID)} src={`${this.props.siteurl}/SiteAssets/Visitor%20and%20Trainee%20Assets/images/close-icon.svg`} />
+                                                        <img onClick={() => this.deleteItem(item.ID)} src={`${this.props.siteurl}/SiteAssets/Visitor%20and%20Trainee%20Assets/images/delete.svg`} />
                                                     </td>
 
                                                 </tr>

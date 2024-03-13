@@ -284,16 +284,16 @@ export default class Visitor extends React.Component<IVisitorProps, VisitorState
                     {this.state.UserInVisitorGroup == true &&
                       <li className="active header_part" id="Visitor" onClick={() => this.VisitorSection()}>
                         <a href="#" className="showStoreClick">
-                          <img src="https://remodigital.sharepoint.com/:f:/r/sites/Remo/RemoSolutions/VTM/SiteAssets/Visitor%20and%20Trainee%20Assets/images/store.svg" className="store-img" />
-                          <img src="https://remodigital.sharepoint.com/:f:/r/sites/Remo/RemoSolutions/VTM/SiteAssets/Visitor%20and%20Trainee%20Assets/images/store-en.svg" className="store-img-h" /> Visitor
+                          <img src={`${this.props.siteurl}/SiteAssets/Visitor%20and%20Trainee%20Assets/images/visitor.svg`} className="store-img" />
+                          <img src={`${this.props.siteurl}/SiteAssets/Visitor%20and%20Trainee%20Assets/images/visitor-h.svg`} className="store-img-h" /> Visitor
                         </a>
                       </li>
                     }
                     {this.state.UserInTrainingGroup == true &&
                       <li className="header_part" id="Training" onClick={() => this.TraineeSection()}>
                         <a href="#" className="showEventBookingClick">
-                          <img className="event-img" src="https://remodigital.sharepoint.com/:f:/r/sites/Remo/RemoSolutions/VTM/SiteAssets/Visitor%20and%20Trainee%20Assets/images/event.svg" alt="image" />
-                          <img className="event-img-h" src="https://remodigital.sharepoint.com/:f:/r/sites/Remo/RemoSolutions/VTM/SiteAssets/Visitor%20and%20Trainee%20Assets/images/event-h.svg" alt="image" />Training
+                          <img className="event-img" src={`${this.props.siteurl}/SiteAssets/Visitor%20and%20Trainee%20Assets/images/event.svg`} alt="image" />
+                          <img className="event-img-h" src={`${this.props.siteurl}/SiteAssets/Visitor%20and%20Trainee%20Assets/images/event-h.svg`} alt="image" />Training
 
                         </a>
                       </li>
@@ -311,12 +311,12 @@ export default class Visitor extends React.Component<IVisitorProps, VisitorState
                     <>
                       <li className="active side_navbar" id='arrow-img' onClick={() => this.visitorEntry()}>
                         <div className="clearfix booking add-store"> <a href="#" className="clearfix">
-                          <div className="f-left" id='add_store'><img src="https://remodigital.sharepoint.com/:f:/r/sites/Remo/RemoSolutions/VTM/SiteAssets/Visitor%20and%20Trainee%20Assets/images/store.svg" className="store-img" />Visitor Entry</div>
+                          <div className="f-left" id='add_store'><img src={`${this.props.siteurl}/SiteAssets/Visitor%20and%20Trainee%20Assets/images/visitor-entry.svg`} className="store-img" />Visitor Entry</div>
                         </a></div>
                       </li>
                       <li className="side_navbar" id='arrow-img' onClick={() => this.visitorDetails()}>
                         <div className="clearfix booking add-store"> <a href="#" className="clearfix">
-                          <div className="f-left" id='add_store'><img src="https://remodigital.sharepoint.com/:f:/r/sites/Remo/RemoSolutions/VTM/SiteAssets/Visitor%20and%20Trainee%20Assets/images/store.svg" className="store-img" />Visitor Details</div>
+                          <div className="f-left" id='add_store'><img src={`${this.props.siteurl}/SiteAssets/Visitor%20and%20Trainee%20Assets/images/details.svg`} className="store-img" />Visitor Details</div>
                         </a></div>
                       </li>
                     </>
@@ -325,17 +325,17 @@ export default class Visitor extends React.Component<IVisitorProps, VisitorState
                     <>
                       <li className="active side_navbar" id='arrow-img' onClick={() => this.trainingEntry()}>
                         <div className="clearfix booking add-store"> <a href="#" className="clearfix">
-                          <div className="f-left" id='add_store'><img src="https://remodigital.sharepoint.com/:f:/r/sites/Remo/RemoSolutions/VTM/SiteAssets/Visitor%20and%20Trainee%20Assets/images/store.svg" className="store-img" />Create Training</div>
+                          <div className="f-left" id='add_store'><img src={`${this.props.siteurl}/SiteAssets/Visitor%20and%20Trainee%20Assets/images/create-training.svg`} className="store-img" />Create Training</div>
                         </a></div>
                       </li>
                       <li className="side_navbar" id='arrow-img' onClick={() => this.trainingInvitee()}>
                         <div className="clearfix booking add-store"> <a href="#" className="clearfix">
-                          <div className="f-left" id='add_store'><img src="https://remodigital.sharepoint.com/:f:/r/sites/Remo/RemoSolutions/VTM/SiteAssets/Visitor%20and%20Trainee%20Assets/images/store.svg" className="store-img" />Training Nomination</div>
+                          <div className="f-left" id='add_store'><img src={`${this.props.siteurl}/SiteAssets/Visitor%20and%20Trainee%20Assets/images/training-nomination.svg`} className="store-img" />Training Nomination</div>
                         </a></div>
                       </li>
                       <li className="side_navbar" id='arrow-img' onClick={() => this.trainingNominee()}>
                         <div className="clearfix booking add-store"> <a href="#" className="clearfix">
-                          <div className="f-left" id='add_store'><img src="https://remodigital.sharepoint.com/:f:/r/sites/Remo/RemoSolutions/VTM/SiteAssets/Visitor%20and%20Trainee%20Assets/images/store.svg" className="store-img" />Training Nominees</div>
+                          <div className="f-left" id='add_store'><img src={`${this.props.siteurl}/SiteAssets/Visitor%20and%20Trainee%20Assets/images/visitor-nominee.svg`} className="store-img" />Training Nominees</div>
                         </a></div>
                       </li>
                     </>
